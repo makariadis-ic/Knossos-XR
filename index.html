@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Κνωσός XR</title>
-<meta name="description" content="Σχηματικό τρισδιάστατο μοντέλο του ανακτόρου της Κνωσού για Meta Quest 3 και Magic Leap 2.">
+<meta name="description" content="Σχηματικά τρισδιάστατα μοντέλα του ανακτόρου της Κνωσού, της ακρόπολης των Μυκηνών και του Θησαυρού του Ατρέα, για Meta Quest 3 και Magic Leap 2.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&family=GFS+Neohellenic:wght@400;700&display=swap">
@@ -24,6 +24,7 @@
   --stone: #CBB792;
   --evans: #7F9FBF;
   --plaster: #EBDFC7;
+  --deco: #9D3B2E;
   --font-display: "GFS Neohellenic", "Fira Sans", "Noto Sans", sans-serif;
   --font-ui: "Fira Sans", "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
   --r: 6px;
@@ -47,6 +48,8 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); fo
 .stage { position: relative; min-width: 0; min-height: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--scene); }
 .stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .stage-tag { position: absolute; left: 12px; top: 12px; font: 600 13px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 5px 9px; }
+.stage-wait { position: absolute; inset: 0; display: grid; place-items: center; font: 500 15px var(--font-ui); color: var(--muted); background: var(--scene); }
+.stage-wait[hidden] { display: none; }
 .rail { min-width: 0; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-inline: 2px; padding-block: 2px 8px; }
 .rail-head h1 { font: 700 34px/1.05 var(--font-display); margin: 0 0 6px; letter-spacing: 0.01em; text-wrap: balance; }
 .rail-head p { margin: 0; color: var(--muted); max-width: 34ch; }
@@ -63,12 +66,17 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); fo
 .seg button { font: 500 14px var(--font-ui); color: var(--ink); background: transparent; border: 0; padding: 9px 10px; cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg.col { grid-template-columns: 1fr; }
+.seg.col button { text-align: left; padding: 9px 12px; }
+.seg.col button + button { border-left: 0; border-top: 1px solid var(--line); }
 .check { display: flex; align-items: center; gap: 9px; font-size: 14px; cursor: pointer; }
 .check input { width: 17px; height: 17px; accent-color: var(--accent); margin: 0; }
+.check[hidden] { display: none; }
 .legend { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
 .legend li { display: flex; align-items: center; gap: 9px; }
+.legend li[hidden] { display: none; }
 .sw { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); flex: none; }
-.sw-stone { background: var(--stone); } .sw-evans { background: var(--evans); } .sw-plaster { background: var(--plaster); }
+.sw-stone { background: var(--stone); } .sw-evans { background: var(--evans); } .sw-plaster { background: var(--plaster); } .sw-deco { background: var(--deco); }
 .info { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
 .info .grp { font-size: 12.5px; color: var(--muted); margin: 0 0 2px; }
 .info h3 { font: 700 22px/1.15 var(--font-display); margin: 0 0 6px; text-wrap: balance; }
@@ -80,6 +88,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); fo
 .poi[aria-current="true"] { background: var(--tint); border-color: var(--accent); font-weight: 600; }
 .foot { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 12px; }
 .foot p { margin: 0; }
+.foot-site { display: grid; gap: 6px; }
 .foot a { color: var(--accent); }
 button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 52rem) {
@@ -93,13 +102,23 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
 <div class="app">
   <main class="stage" id="stage" aria-label="Τρισδιάστατο μοντέλο του ανακτόρου της Κνωσού">
     <div class="stage-tag" id="stageTag">Σήμερα</div>
+    <div class="stage-wait" id="stageWait" hidden>Δημιουργία του μοντέλου…</div>
   </main>
 
   <aside class="rail">
     <header class="rail-head">
-      <h1>Κνωσός XR</h1>
-      <p>Το ανάκτορο της Κνωσού ως μακέτα πάνω στο θρανίο ή σε φυσικό μέγεθος, για Meta Quest 3 και Magic Leap 2.</p>
+      <h1 id="siteTitle">Κνωσός XR</h1>
+      <p id="siteLead">Το ανάκτορο της Κνωσού ως μακέτα πάνω στο θρανίο ή σε φυσικό μέγεθος, για Meta Quest 3 και Magic Leap 2.</p>
     </header>
+
+    <section class="block" aria-labelledby="h-site">
+      <h2 id="h-site">Χώρος</h2>
+      <div class="seg col" role="radiogroup" aria-labelledby="h-site">
+        <button role="radio" aria-checked="true" data-site="knossos">Ανάκτορο της Κνωσού</button>
+        <button role="radio" aria-checked="false" data-site="mykines">Ακρόπολη των Μυκηνών</button>
+        <button role="radio" aria-checked="false" data-site="atreas">Θησαυρός του Ατρέα</button>
+      </div>
+    </section>
 
     <section class="block" aria-labelledby="h-xr">
       <h2 id="h-xr">Είσοδος σε XR</h2>
@@ -116,12 +135,14 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
         <button role="radio" aria-checked="true" id="vToday" data-view="today">Σήμερα</button>
         <button role="radio" aria-checked="false" id="vRecon" data-view="recon">Αναπαράσταση</button>
       </div>
-      <label class="check" for="chkEvans"><input type="checkbox" id="chkEvans" checked> Επεμβάσεις Evans με χρώμα</label>
+      <label class="check" for="chkEvans" id="rowEvans"><input type="checkbox" id="chkEvans" checked> Επεμβάσεις Evans με χρώμα</label>
+      <label class="check" for="chkSection" id="rowSection" hidden><input type="checkbox" id="chkSection" checked> Τομή κατά μήκος</label>
       <label class="check" for="chkLabels"><input type="checkbox" id="chkLabels" checked> Ετικέτες</label>
       <ul class="legend">
-        <li><span class="sw sw-stone"></span>Σωζόμενα τμήματα</li>
-        <li><span class="sw sw-evans"></span>Ανακατασκευές του Evans</li>
-        <li><span class="sw sw-plaster"></span>Υποθετική αναπαράσταση</li>
+        <li data-legend="stone"><span class="sw sw-stone"></span>Σωζόμενα τμήματα</li>
+        <li data-legend="evans"><span class="sw sw-evans"></span>Ανακατασκευές του Evans</li>
+        <li data-legend="plaster"><span class="sw sw-plaster"></span>Υποθετική αναπαράσταση</li>
+        <li data-legend="deco" hidden><span class="sw sw-deco"></span>Αναπαράσταση της διακόσμησης</li>
       </ul>
     </section>
 
@@ -140,8 +161,8 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
     </section>
 
     <footer class="foot">
-      <p>Σχηματικό μοντέλο. Οι θέσεις και οι διαστάσεις των χώρων είναι κατά προσέγγιση. Σταθερά σημεία αναφοράς: Κεντρική Αυλή περίπου 50 × 25 μ., έκταση ανακτόρου 20.000 m².</p>
-      <p>Πηγές: Υπουργείο Πολιτισμού, <a href="https://www.ancientportsantiques.com/wp-content/uploads/Documents/PLACES/Crete-Cyprus/Knossos-Brochure2022.pdf" target="_blank" rel="noopener">ενημερωτικό φυλλάδιο «Knossos» (ΤΑΠ)</a>. Εφορεία Αρχαιοτήτων Ηρακλείου, <a href="https://www.searchculture.gr/aggregator/edm/knossos/000158-ce264eb8-2fd4-4097-a817-8af029a7fd86" target="_blank" rel="noopener">Νότιο Πρόπυλο</a>. <a href="https://crete.classics.ox.ac.uk/U3S1/U3S1L2.html" target="_blank" rel="noopener">University of Oxford, Ancient Crete</a>.</p>
+      <div id="siteFoot" class="foot-site"></div>
+      <p><a href="qr.html">Κωδικοί QR για την τάξη</a></p>
       <p>Κέντρο Καινοτομίας Θεσσαλίας</p>
     </footer>
   </aside>
@@ -162,12 +183,1041 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const UI_FONT = '"Fira Sans", "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif';
 const DISPLAY_FONT = '"GFS Neohellenic", "Fira Sans", "Noto Sans", sans-serif';
+const YAX = new THREE.Vector3(0, 1, 0);
 
 /* ------------------------------------------------------------------
-   Σημεία ενδιαφέροντος. Συντεταγμένες σε μέτρα: x προς ανατολή, z προς νότο,
-   αρχή στο κέντρο της Κεντρικής Αυλής, y = 0 στο επίπεδο της αυλής.
+   Χώροι. Κάθε χώρος έχει δικά του σημεία, μακέτα και ρυθμίσεις κάμερας.
    ------------------------------------------------------------------ */
-const POIS = [
+const SITES = {};
+const SITE_IDS = ['knossos', 'mykines', 'atreas'];
+
+/* ------------------------------------------------------------------
+   Βοηθητικά κατασκευής. Γράφουν στο τρέχον πλαίσιο (cur), που μπορεί
+   να έχει δικό του σύστημα συντεταγμένων (στροφή και μετατόπιση).
+   walls: κουτιά με ύψος σήμερα (h) και ύψος στην αναπαράσταση (H)
+   ------------------------------------------------------------------ */
+const WALL_T = 0.8;
+let cur = null;
+const newCtx = () => ({ walls: [], fixed: {}, cols: [], pithoi: [], horns: [], bases: [], frame: null });
+function setFrame(ox, oz, theta) {
+  cur.frame = theta == null ? null : { ox, oz, c: Math.cos(theta), s: Math.sin(theta), phi: -theta };
+}
+function W(x, z) {
+  const f = cur.frame;
+  return f ? [f.ox + x * f.c - z * f.s, f.oz + x * f.s + z * f.c] : [x, z];
+}
+const framePhi = () => (cur.frame ? cur.frame.phi : 0);
+
+function box(key, cx, cy, cz, lx, ly, lz, ry = 0) {
+  const [x, z] = W(cx, cz);
+  (cur.fixed[key] ||= []).push([x, cy, z, lx, ly, lz, ry + framePhi()]);
+}
+function block(cx, cz, lx, lz, o) {
+  const [x, z] = W(cx, cz);
+  cur.walls.push({ cx: x, cz: z, lx, lz, ry: (o.ry ?? 0) + framePhi(), y0: o.y0 ?? 0, h: o.h ?? 1.2, H: o.H ?? o.h ?? 1.2, evans: !!o.evans, low: o.low, up: o.up });
+}
+function seg(x0, z0, x1, z1, t, o) {
+  const horiz = Math.abs(z1 - z0) < 1e-6;
+  const len = horiz ? Math.abs(x1 - x0) : Math.abs(z1 - z0);
+  if (len < 0.05) return;
+  block((x0 + x1) / 2, (z0 + z1) / 2, horiz ? len : t, horiz ? t : len, o);
+}
+function aseg(x0, z0, x1, z1, t, o) {
+  const dx = x1 - x0, dz = z1 - z0, len = Math.hypot(dx, dz);
+  if (len < 0.05) return;
+  block((x0 + x1) / 2, (z0 + z1) / 2, len, t, { ...o, ry: Math.atan2(-dz, dx) });
+}
+function wallRun(a0, a1, fixedCoord, horiz, t, doors, o) {
+  const cuts = doors.map(([c, w]) => [c - w / 2, c + w / 2]).sort((p, q) => p[0] - q[0]);
+  let s = a0;
+  const emit = (p, q) => (horiz ? seg(p, fixedCoord, q, fixedCoord, t, o) : seg(fixedCoord, p, fixedCoord, q, t, o));
+  for (const [d0, d1] of cuts) {
+    if (d0 > s) emit(s, Math.min(d0, a1));
+    s = Math.max(s, d1);
+  }
+  if (s < a1) emit(s, a1);
+}
+function room(x0, z0, x1, z1, o = {}) {
+  const t = o.t ?? WALL_T, half = t / 2, d = o.doors || {}, skip = o.skip || '';
+  if (!skip.includes('n')) wallRun(x0, x1, z0 + half, true, t, d.n || [], o);
+  if (!skip.includes('s')) wallRun(x0, x1, z1 - half, true, t, d.s || [], o);
+  if (!skip.includes('w')) wallRun(z0 + t, z1 - t, x0 + half, false, t, d.w || [], o);
+  if (!skip.includes('e')) wallRun(z0 + t, z1 - t, x1 - half, false, t, d.e || [], o);
+}
+function pillar(x, z, o) { block(x, z, o.s ?? 0.8, o.s ?? 0.8, o); }
+function col(x, z, o) { const [wx, wz] = W(x, z); cur.cols.push({ x: wx, z: wz, y0: o.y0 ?? 0, ht: o.ht ?? 0, H: o.H ?? 3.2, s: o.s ?? 1 }); }
+function colBase(x, z, y, r = 0.45) { const [wx, wz] = W(x, z); cur.bases.push({ x: wx, z: wz, y, r }); }
+
+/* ------------------------------------------------------------------
+   Σκηνή και υλικά
+   ------------------------------------------------------------------ */
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.xr.enabled = true;
+stage.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, 1, 0.5, 3000);
+camera.position.set(-100, 92, 104);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(-14, 0, -16);
+controls.enableDamping = true;
+controls.maxPolarAngle = 1.42;
+controls.minDistance = 12;
+controls.maxDistance = 520;
+
+scene.add(new THREE.HemisphereLight(0xEEF3F8, 0x8A7958, 1.15));
+const sun = new THREE.DirectionalLight(0xFFF1DC, 1.7);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.bias = -0.0006;
+scene.add(sun, sun.target);
+
+// Όλοι οι χώροι κρέμονται από τον world: η μακέτα στα γυαλιά μετακινεί και κλιμακώνει μόνο αυτόν.
+const world = new THREE.Group();
+scene.add(world);
+
+const HEX = {
+  ground: 0xB29C74, pave: 0xD3C5A6, court: 0xDCCFB1, road: 0xC5B48F, steps: 0xCFC1A1, pit: 0x564B3D,
+  stone: 0xCBB792, plaster: 0xEBDFC7, evans: 0x7F9FBF, red: 0xA2382B, dark: 0x2C2622,
+  pithos: 0xB7764A, horn: 0xF1E9D8, panelRed: 0xB0533B, panelOchre: 0xC48E45, panelBlue: 0x4C7EA8,
+  rubble: 0xB8A98B, mud: 0xE4D8C0, roof: 0xCDBB98, floorMyk: 0xD8C8A6, hearth: 0x9A4B34, base: 0xB4A88F,
+  shaftMyk: 0x8E3E2D, capMyk: 0x3B2F27, relief: 0xD8CEBA, skirt: 0x7E705A, sign: 0x2B3236,
+  earth: 0x8C7759, cut: 0xBDB39D, rock: 0x8F8271, green: 0x5D7E62, deco: 0x9D3B2E, bronze: 0xA8773A,
+};
+const mat = (hex, o = {}) => new THREE.MeshLambertMaterial({ color: hex, ...o });
+const M = {};
+for (const k of Object.keys(HEX)) M[k] = mat(HEX[k]);
+M.evansToday = mat(HEX.evans);
+M.evansRecon = mat(HEX.evans);
+M.shaftToday = mat(HEX.red);
+M.capToday = mat(HEX.dark);
+M.shaftRecon = mat(HEX.red);
+M.capRecon = mat(HEX.dark);
+
+let seed = 11;
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const unitBox = new THREE.BoxGeometry(1, 1, 1);
+const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _p = new THREE.Vector3(), _c = new THREE.Color();
+
+function instanced(geom, material, items, toMatrix, vary = 0.1) {
+  const mesh = new THREE.InstancedMesh(geom, material, Math.max(items.length, 1));
+  items.forEach((it, i) => {
+    toMatrix(it, _m);
+    mesh.setMatrixAt(i, _m);
+    const k = 1 - vary / 2 + rnd() * vary;
+    mesh.setColorAt(i, _c.setRGB(k, k, k));
+  });
+  mesh.count = items.length;
+  mesh.instanceMatrix.needsUpdate = true;
+  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  mesh.frustumCulled = false;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+const boxMatrix = (b, m) => m.compose(_p.set(b[0], b[1], b[2]), _q.setFromAxisAngle(YAX, b[6] || 0), _s.set(b[3], b[4], b[5]));
+const FLAT_KEYS = new Set(['ground', 'court', 'pave', 'road', 'floorMyk']);
+
+// Μινωικοί και μυκηναϊκοί κίονες: κορμός που στενεύει προς τα κάτω, κιονόκρανο και άβακας
+const shaftGeom = new THREE.CylinderGeometry(0.3, 0.22, 1, 14).translate(0, 0.5, 0);
+const capitalGeom = mergeGeometries([
+  new THREE.CylinderGeometry(0.42, 0.34, 0.26, 14).translate(0, 0.13, 0),
+  new THREE.BoxGeometry(0.95, 0.18, 0.95).translate(0, 0.35, 0),
+]);
+
+// Από τα δεδομένα του πλαισίου (cur) στα πλέγματα του χώρου
+function buildBoxes(site) {
+  const c = cur, add = (group, mesh) => { if (mesh) group.add(mesh); };
+  const inst = (material, list, vary) => (list.length ? instanced(unitBox, material, list, boxMatrix, vary) : null);
+  for (const [key, list] of Object.entries(c.fixed)) {
+    const mesh = inst(M[key], list, key === 'ground' ? 0 : 0.08);
+    if (FLAT_KEYS.has(key)) mesh.castShadow = false;
+    site.root.add(mesh);
+  }
+  const T = (w, y0, hh) => [w.cx, y0 + hh / 2, w.cz, w.lx, hh, w.lz, w.ry];
+  const byKey = (list, keyOf) => {
+    const m = new Map();
+    for (const w of list) { const k = keyOf(w); if (!m.has(k)) m.set(k, []); m.get(k).push(w); }
+    return m;
+  };
+  const lowKey = (w) => w.low || site.wallLow || 'stone';
+  const upKey = (w) => w.up || site.wallUp || 'plaster';
+  const plain = c.walls.filter((w) => !w.evans);
+  for (const [k, list] of byKey(plain.filter((w) => w.h > 0), lowKey)) {
+    add(site.today, inst(M[k], list.map((w) => T(w, w.y0, w.h))));
+    add(site.recon, inst(M[k], list.map((w) => T(w, w.y0, Math.min(w.h, w.H)))));
+  }
+  for (const [k, list] of byKey(plain.filter((w) => w.H > w.h), upKey)) add(site.recon, inst(M[k], list.map((w) => T(w, w.y0 + w.h, w.H - w.h))));
+  const ev = c.walls.filter((w) => w.evans);
+  add(site.today, inst(M.evansToday, ev.filter((w) => w.h > 0).map((w) => T(w, w.y0, w.h))));
+  add(site.recon, inst(M.evansRecon, ev.map((w) => T(w, w.y0, Math.max(w.h, w.H)))));
+
+  const [shT, caT, shR, caR] = site.colMats || ['shaftToday', 'capToday', 'shaftRecon', 'capRecon'];
+  const colSet = (list, heightOf, shaftMat, capMat, group) => {
+    if (!list.length) return;
+    group.add(instanced(shaftGeom, shaftMat, list, (q, m) => m.compose(_p.set(q.x, q.y0, q.z), _q.identity(), _s.set(q.s, Math.max(heightOf(q) - 0.44 * q.s, 0.1), q.s)), 0.06));
+    group.add(instanced(capitalGeom, capMat, list, (q, m) => m.compose(_p.set(q.x, q.y0 + Math.max(heightOf(q) - 0.44 * q.s, 0.1), q.z), _q.identity(), _s.set(q.s, q.s, q.s)), 0.04));
+  };
+  colSet(c.cols.filter((q) => q.ht > 0), (q) => q.ht, M[shT], M[caT], site.today);
+  colSet(c.cols.filter((q) => q.H > 0), (q) => q.H, M[shR], M[caR], site.recon);
+  if (c.bases.length) {
+    const baseGeom = new THREE.CylinderGeometry(1, 1.06, 0.22, 18).translate(0, 0.11, 0);
+    site.root.add(instanced(baseGeom, M.base, c.bases, (b, m) => m.compose(_p.set(b.x, b.y, b.z), _q.identity(), _s.set(b.r, 1, b.r)), 0.08));
+  }
+  if (c.pithoi.length) {
+    const profile = [[0, 0], [0.2, 0], [0.3, 0.12], [0.42, 0.55], [0.45, 0.92], [0.39, 1.22], [0.27, 1.42], [0.27, 1.5], [0.32, 1.54], [0.29, 1.58], [0, 1.58]].map(([r, y]) => new THREE.Vector2(r, y));
+    site.root.add(instanced(new THREE.LatheGeometry(profile, 16), M.pithos, c.pithoi, (p, m) => m.compose(_p.set(p.x, p.y0, p.z), _q.identity(), _s.setScalar(p.s)), 0.14));
+  }
+  if (c.horns.length) {
+    // Κέρατα καθοσιώσεως (μόνο στην αναπαράσταση)
+    const hs = new THREE.Shape();
+    hs.moveTo(-0.55, 0); hs.lineTo(0.55, 0); hs.lineTo(0.55, 0.78); hs.lineTo(0.4, 0.78); hs.lineTo(0.28, 0.24);
+    hs.lineTo(-0.28, 0.24); hs.lineTo(-0.4, 0.78); hs.lineTo(-0.55, 0.78); hs.closePath();
+    const hornGeom = new THREE.ExtrudeGeometry(hs, { depth: 0.3, bevelEnabled: false }).translate(0, 0, -0.15);
+    const qHorn = new THREE.Quaternion().setFromAxisAngle(YAX, Math.PI / 2);
+    site.recon.add(instanced(hornGeom, M.horn, c.horns, (h, m) => m.compose(_p.set(h.x, h.y, h.z), qHorn, _s.setScalar(1.25)), 0));
+  }
+}
+
+/* ------------------------------------------------------------------
+   Υφές από καμβά: κυκλώπεια τοιχοποιία, λιθόπλινθοι σε δόμους, διακοσμητικά
+   ------------------------------------------------------------------ */
+function canvasTexture(c) {
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
+}
+function repeatTexture(c) {
+  const t = canvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+function noiseRand(s) { return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+
+// Ακανόνιστοι ογκόλιθοι (κελιά Voronoi σε πλέγμα που επαναλαμβάνεται χωρίς ραφή)
+function cyclopeanCanvas(size = 512, cells = 6, seedValue = 5) {
+  const r = noiseRand(seedValue);
+  const pts = [];
+  for (let j = 0; j < cells; j++) for (let i = 0; i < cells; i++) pts.push([(i + 0.18 + 0.64 * r()) / cells, (j + 0.18 + 0.64 * r()) / cells, 0.8 + 0.32 * r()]);
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d'), img = g.createImageData(size, size), d = img.data;
+  const jw = 2.6 / size;
+  for (let y = 0; y < size; y++) {
+    const v = (y + 0.5) / size, cj = Math.floor(v * cells);
+    for (let x = 0; x < size; x++) {
+      const u = (x + 0.5) / size, ci = Math.floor(u * cells);
+      let d1 = 9, d2 = 9, sh = 1;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+        const ii = ci + di, jj = cj + dj;
+        const p = pts[((jj + cells) % cells) * cells + ((ii + cells) % cells)];
+        const px = p[0] + Math.floor(ii / cells), py = p[1] + Math.floor(jj / cells);
+        const dd = (u - px) ** 2 + (v - py) ** 2;
+        if (dd < d1) { d2 = d1; d1 = dd; sh = p[2]; } else if (dd < d2) d2 = dd;
+      }
+      const edge = (Math.sqrt(d2) - Math.sqrt(d1)) * 0.5;
+      let k = sh * (0.93 + 0.07 * r());
+      if (edge < jw) k *= 0.3 + 0.7 * (edge / jw);
+      else k *= 1 - 0.1 * Math.max(0, 1 - edge * cells * 2.2);
+      const o = (y * size + x) * 4;
+      d[o] = 214 * k; d[o + 1] = 204 * k; d[o + 2] = 184 * k; d[o + 3] = 255;
+    }
+  }
+  g.putImageData(img, 0, 0);
+  return c;
+}
+// Ορθογώνιοι λίθοι σε οριζόντιους δόμους
+function ashlarCanvas({ size = 512, rows = 8, minLen = 0.12, maxLen = 0.3, seedValue = 9, base = [205, 194, 172], joint = 'rgba(70,60,46,0.9)' } = {}) {
+  const r = noiseRand(seedValue);
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d');
+  g.fillStyle = joint; g.fillRect(0, 0, size, size);
+  const rh = size / rows;
+  for (let j = 0; j < rows; j++) {
+    let x = -r() * maxLen * size;
+    while (x < size) {
+      const w = (minLen + (maxLen - minLen) * r()) * size;
+      const k = 0.82 + 0.26 * r();
+      g.fillStyle = `rgb(${base[0] * k | 0},${base[1] * k | 0},${base[2] * k | 0})`;
+      for (const off of [0, size]) g.fillRect(x + 1.5 - off, j * rh + 1.5, w - 3, rh - 3);
+      x += w;
+    }
+  }
+  return c;
+}
+// Οι 33 δόμοι του θόλου: μία λωρίδα ανά δόμο, κατακόρυφοι αρμοί σε εναλλαγή
+function coursesCanvas(courses = 33) {
+  const r = noiseRand(21);
+  const c = document.createElement('canvas'); c.width = 2048; c.height = 1024;
+  const g = c.getContext('2d');
+  g.fillStyle = '#5E5446'; g.fillRect(0, 0, c.width, c.height);
+  const rh = c.height / courses;
+  for (let j = 0; j < courses; j++) {
+    const n = Math.max(12, Math.round(46 * Math.cos((j / courses) * Math.PI / 2.15)));
+    const w = c.width / n, off = (j % 2) * w / 2;
+    for (let i = -1; i <= n; i++) {
+      const k = 0.84 + 0.22 * r();
+      g.fillStyle = `rgb(${200 * k | 0},${190 * k | 0},${168 * k | 0})`;
+      g.fillRect(i * w + off + 1.5, c.height - (j + 1) * rh + 1.5, w - 3, rh - 3);
+    }
+  }
+  return c;
+}
+function zigzagCanvas() {
+  const c = document.createElement('canvas'); c.width = 128; c.height = 256;
+  const g = c.getContext('2d');
+  g.fillStyle = '#4F7556'; g.fillRect(0, 0, 128, 256);
+  g.strokeStyle = '#A9C3A2'; g.lineWidth = 7;
+  for (let y = -32; y < 288; y += 32) { g.beginPath(); g.moveTo(0, y); g.lineTo(32, y + 16); g.lineTo(64, y); g.lineTo(96, y + 16); g.lineTo(128, y); g.stroke(); }
+  return c;
+}
+function rosetteCanvas() {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#8E3428'; g.fillRect(0, 0, 512, 128);
+  g.fillStyle = '#E3B9A4';
+  for (let i = 0; i < 4; i++) {
+    const cx = 64 + i * 128, cy = 64;
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; g.beginPath(); g.ellipse(cx + Math.cos(a) * 26, cy + Math.sin(a) * 26, 18, 9, a, 0, Math.PI * 2); g.fill(); }
+    g.beginPath(); g.arc(cx, cy, 12, 0, Math.PI * 2); g.fillStyle = '#C9774F'; g.fill(); g.fillStyle = '#E3B9A4';
+  }
+  return c;
+}
+function spiralCanvas() {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 256;
+  const g = c.getContext('2d');
+  g.fillStyle = '#93372A'; g.fillRect(0, 0, 512, 256);
+  g.strokeStyle = '#E1B49B'; g.lineWidth = 6;
+  for (let row = 0; row < 2; row++) for (let i = 0; i < 4; i++) {
+    const cx = 64 + i * 128, cy = 64 + row * 128;
+    g.beginPath();
+    for (let t = 0; t < 4 * Math.PI; t += 0.1) { const rr = 4 + t * 3.6; g.lineTo(cx + Math.cos(t) * rr, cy + Math.sin(t) * rr); }
+    g.stroke();
+  }
+  return c;
+}
+// Υφή με κλίμακα σε μέτρα: η υφή καλύπτει «size» μέτρα
+const TEX = {};
+function texMat(key, make, color = 0xFFFFFF, side = THREE.FrontSide) {
+  if (!TEX[key]) TEX[key] = new THREE.MeshLambertMaterial({ map: repeatTexture(make()), color, side });
+  return TEX[key];
+}
+function scaleUV(geom, k) {
+  const uv = geom.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * k, uv.getY(i) * k);
+  uv.needsUpdate = true;
+  return geom;
+}
+// Κουτί με συντεταγμένες υφής σε μέτρα (για υφές που επαναλαμβάνονται)
+function texBox(lx, ly, lz, S) {
+  const geom = new THREE.BoxGeometry(lx, ly, lz);
+  const uv = geom.attributes.uv;
+  const dims = [[lz, ly], [lz, ly], [lx, lz], [lx, lz], [lx, ly], [lx, ly]];
+  for (let f = 0; f < 6; f++) for (let k = 0; k < 4; k++) {
+    const i = f * 4 + k;
+    uv.setXY(i, uv.getX(i) * dims[f][0] / S, uv.getY(i) * dims[f][1] / S);
+  }
+  return geom;
+}
+// Εξώθηση σχήματος σε επίπεδο XY κατά +Z, με υφή σε μέτρα
+function extrude(shape, depth, S = 4) {
+  return scaleUV(new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 8 }), 1 / S);
+}
+const shapeOf = (pts) => new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(x, y)));
+
+/* ------------------------------------------------------------------
+   Πινακίδες και ετικέτες (canvas)
+   ------------------------------------------------------------------ */
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function flatSign(c, widthM, x, z, y = 0.08, rot = 0) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(widthM, widthM * c.height / c.width),
+    new THREE.MeshBasicMaterial({ map: canvasTexture(c), transparent: true, depthWrite: false }));
+  m.rotation.set(-Math.PI / 2, 0, 0);
+  m.rotateZ(rot);
+  m.position.set(x, y, z);
+  m.renderOrder = 2;
+  return m;
+}
+function compassCanvas() {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 256;
+  const g = c.getContext('2d');
+  g.fillStyle = 'rgba(29,35,38,0.88)'; g.beginPath(); g.arc(128, 128, 120, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#F2F4F5'; g.beginPath(); g.moveTo(128, 34); g.lineTo(160, 150); g.lineTo(128, 128); g.lineTo(96, 150); g.closePath(); g.fill();
+  g.font = `700 64px ${UI_FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('Β', 128, 196);
+  return c;
+}
+// Μπάρα κλίμακας: η πινακίδα έχει πλάτος 1,2 × len μέτρα και η μπάρα σχεδιάζεται σε ακριβή αναλογία
+function scaleCanvas(len = 50) {
+  const c = document.createElement('canvas'); c.width = 1200; c.height = 220;
+  const g = c.getContext('2d'); const pxPerM = 1200 / (len * 1.2); const x0 = len * 0.1 * pxPerM;
+  g.fillStyle = 'rgba(29,35,38,0.86)'; roundRect(g, 0, 0, 1200, 220, 18); g.fill();
+  g.fillStyle = '#F2F4F5';
+  g.fillRect(x0, 120, len / 2 * pxPerM, 26);
+  g.strokeStyle = '#F2F4F5'; g.lineWidth = 5; g.strokeRect(x0 + len / 2 * pxPerM, 120, len / 2 * pxPerM, 26);
+  g.font = `600 52px ${UI_FONT}`; g.textBaseline = 'alphabetic';
+  g.textAlign = 'center';
+  g.fillText('0', x0, 98); g.fillText(String(len / 2), x0 + len / 2 * pxPerM, 98); g.fillText(`${len} μ.`, x0 + len * pxPerM, 98);
+  return c;
+}
+// Πινακίδα με κείμενο σε δύο γραμμές και βέλος προς μνημείο έξω από τη μακέτα (dir: διεύθυνση σε x, z)
+function arrowSignCanvas(line1, line2, dir = [1, 0]) {
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 300;
+  const g = c.getContext('2d');
+  g.fillStyle = 'rgba(29,35,38,0.88)'; roundRect(g, 0, 0, 1024, 300, 22); g.fill();
+  g.save();
+  g.translate(880, 150);
+  g.rotate(Math.atan2(dir[1], dir[0]));
+  g.fillStyle = '#F2F4F5';
+  g.beginPath(); g.moveTo(95, 0); g.lineTo(15, -70); g.lineTo(15, -30); g.lineTo(-80, -30); g.lineTo(-80, 30); g.lineTo(15, 30); g.lineTo(15, 70); g.closePath(); g.fill();
+  g.restore();
+  g.fillStyle = '#F2F4F5'; g.textBaseline = 'alphabetic';
+  g.font = `700 70px ${DISPLAY_FONT}`; g.fillText(line1, 50, 130);
+  g.font = `500 52px ${UI_FONT}`; g.fillStyle = '#C9D3D8'; g.fillText(line2, 50, 222);
+  return c;
+}
+
+function drawLabel(poi, selected) {
+  const fs = 44, padX = 24, padY = 15;
+  const c = poi._canvas || (poi._canvas = document.createElement('canvas'));
+  const g = c.getContext('2d');
+  g.font = `600 ${fs}px ${UI_FONT}`;
+  const w = Math.ceil(g.measureText(poi.name).width) + padX * 2, h = fs + padY * 2;
+  c.width = w; c.height = h;
+  g.font = `600 ${fs}px ${UI_FONT}`;
+  g.fillStyle = selected ? '#A9362B' : 'rgba(27,33,36,0.88)';
+  roundRect(g, 0, 0, w, h, 8); g.fill();
+  if (selected) { g.strokeStyle = '#F6E7E4'; g.lineWidth = 3; roundRect(g, 1.5, 1.5, w - 3, h - 3, 7); g.stroke(); }
+  g.fillStyle = '#F4F6F7'; g.textBaseline = 'middle';
+  g.fillText(poi.name, padX, h / 2 + 2);
+  return c;
+}
+const labelGeom = new THREE.PlaneGeometry(1, 1);
+function buildLabels(site) {
+  site.labelsGroup = new THREE.Group();
+  site.labelsGroup.visible = state.labels;
+  site.root.add(site.labelsGroup);
+  site.labels = new Map();
+  for (const poi of site.pois) {
+    const c = drawLabel(poi, false);
+    const mesh = new THREE.Mesh(labelGeom, new THREE.MeshBasicMaterial({ map: canvasTexture(c), transparent: true, depthTest: false, depthWrite: false }));
+    mesh.renderOrder = 10;
+    mesh.userData.poi = poi.id;
+    site.labelsGroup.add(mesh);
+    site.labels.set(poi.id, mesh);
+  }
+  site.pointerLines = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x1D2326, transparent: true, opacity: 0.55 }));
+  site.pointerLines.geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(site.pois.length * 6), 3));
+  site.pointerLines.frustumCulled = false;
+  site.labelsGroup.add(site.pointerLines);
+}
+function refreshLabelTexture(site, id) {
+  const poi = site.POI[id], mesh = site.labels && site.labels.get(id);
+  if (!poi || !mesh) return;
+  drawLabel(poi, site.selected === id);
+  mesh.material.map.dispose();
+  mesh.material.map = canvasTexture(poi._canvas);
+  mesh.material.needsUpdate = true;
+}
+
+// Οι κύριες ετικέτες φαίνονται πάντα, οι υπόλοιπες όταν πλησιάζει κανείς ή όταν επιλεγούν.
+const camPos = new THREE.Vector3(), labelPos = new THREE.Vector3();
+const billboardQuat = new THREE.Quaternion(), parentQuat = new THREE.Quaternion();
+function updateLabels() {
+  const site = SITES[state.site];
+  if (!state.labels || !site.labels) return;
+  const presenting = renderer.xr.isPresenting;
+  const cam = presenting ? renderer.xr.getCamera() : camera;
+  cam.matrixWorld.decompose(camPos, billboardQuat, _s);
+  site.labelsGroup.getWorldQuaternion(parentQuat).invert();
+  const q = parentQuat.multiply(billboardQuat);
+  const sc = world.scale.x;
+  const walk = presenting && xr.mode === 'walk';
+  const table = presenting && xr.mode === 'table';
+  const baseLift = walk ? 2.6 : (state.view === 'recon' ? site.lift.recon : site.lift.today);
+  const pos = site.pointerLines.geometry.attributes.position;
+  site.pois.forEach((poi, i) => {
+    const mesh = site.labels.get(poi.id), c = poi._canvas;
+    const [x, y, z] = poi.p;
+    const sel = site.selected === poi.id, major = site.major.has(poi.id);
+    const lift = walk ? baseLift : baseLift * (site.liftMap[poi.id] ?? (major ? 1 : 0.62));
+    labelPos.set(x, y + lift, z);
+    site.labelsGroup.localToWorld(labelPos);
+    const d = labelPos.distanceTo(camPos);
+    let visible = sel || major || (walk ? d < 45 : table ? d < 0.5 : d < site.near);
+    if (walk && !sel && d > 220) visible = false;
+    mesh.visible = visible;
+    if (!visible) {
+      pos.setXYZ(i * 2, x, y, z);
+      pos.setXYZ(i * 2 + 1, x, y, z);
+      return;
+    }
+    // Ύψος ετικέτας ανάλογο της απόστασης: σταθερό φαινόμενο μέγεθος σε οθόνη και γυαλιά
+    let hp = d * 0.03 * (sel ? 1.15 : 1);
+    hp = presenting ? THREE.MathUtils.clamp(hp, walk ? 0.12 : 0.008, walk ? 1.4 : 0.06) : THREE.MathUtils.clamp(hp, site.labelClamp[0], site.labelClamp[1]);
+    const hl = hp / sc;
+    mesh.scale.set(hl * c.width / c.height, hl, 1);
+    mesh.position.set(x, y + lift + hl / 2, z);
+    mesh.quaternion.copy(q);
+    pos.setXYZ(i * 2, x, y + 0.1, z);
+    pos.setXYZ(i * 2 + 1, x, y + lift, z);
+  });
+  pos.needsUpdate = true;
+}
+const visibleLabels = () => {
+  const s = SITES[state.site];
+  return s.labels ? [...s.labels.values()].filter((m) => m.visible) : [];
+};
+
+/* ------------------------------------------------------------------
+   Κατάσταση και επιλογές προβολής
+   ------------------------------------------------------------------ */
+const state = { site: 'knossos', view: 'today', evans: true, labels: true, section: true };
+const xr = { session: null, kind: null, mode: 'table', refType: 'local-floor', needsPlacement: 0, table: { scale: 1 / 250, rot: 0, dy: 0 } };
+const site = () => SITES[state.site];
+const builtSites = () => SITE_IDS.map((k) => SITES[k]).filter((s) => s.root);
+
+function applyEvansColors() {
+  const on = state.evans;
+  M.evansToday.color.setHex(on ? HEX.evans : HEX.stone);
+  M.evansRecon.color.setHex(on ? HEX.evans : HEX.plaster);
+  M.shaftToday.color.setHex(on ? HEX.evans : HEX.red);
+  M.capToday.color.setHex(on ? 0x56708A : HEX.dark);
+}
+function setView(v) {
+  state.view = v;
+  for (const s of builtSites()) { s.today.visible = v === 'today'; s.recon.visible = v === 'recon'; s.onView?.(v); }
+  document.getElementById('vToday').setAttribute('aria-checked', String(v === 'today'));
+  document.getElementById('vRecon').setAttribute('aria-checked', String(v === 'recon'));
+  document.getElementById('stageTag').textContent = v === 'today' ? 'Σήμερα' : 'Αναπαράσταση';
+  drawMenu();
+}
+function setEvans(on) {
+  state.evans = on;
+  document.getElementById('chkEvans').checked = on;
+  applyEvansColors();
+  drawMenu();
+}
+function setLabels(on) {
+  state.labels = on;
+  document.getElementById('chkLabels').checked = on;
+  for (const s of builtSites()) s.labelsGroup.visible = on;
+  drawMenu();
+}
+function setSection(on) {
+  state.section = on;
+  document.getElementById('chkSection').checked = on;
+  for (const s of builtSites()) s.onSection?.(on);
+  drawMenu();
+}
+function selectPoi(id, fly = false) {
+  const s = site();
+  const prev = s.selected;
+  s.selected = id;
+  if (prev && prev !== id) refreshLabelTexture(s, prev);
+  refreshLabelTexture(s, id);
+  const poi = s.POI[id];
+  document.getElementById('infoGroup').textContent = poi.group;
+  document.getElementById('infoName').textContent = poi.name;
+  document.getElementById('infoText').textContent = poi.text;
+  document.querySelectorAll('.poi').forEach((b) => b.setAttribute('aria-current', String(b.dataset.poi === id)));
+  if (fly && !xr.session) flyTo(poi);
+  drawMenu();
+}
+
+/* ------------------------------------------------------------------
+   Επιφάνεια εργασίας: πτήση της κάμερας προς ένα σημείο
+   ------------------------------------------------------------------ */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let flight = null;
+function flyTo(poi) {
+  const s = site();
+  const target = new THREE.Vector3(...poi.p);
+  const dir = poi.view ? new THREE.Vector3(poi.view[0], 0, poi.view[1]) : camera.position.clone().sub(controls.target).setY(0);
+  if (dir.lengthSq() < 1e-6) dir.set(-1, 0, 1);
+  dir.normalize();
+  const camEnd = target.clone().addScaledVector(dir, s.cam.back);
+  camEnd.y = target.y + s.cam.up;
+  if (reduceMotion) { controls.target.copy(target); camera.position.copy(camEnd); return; }
+  flight = { t0: performance.now(), dur: 750, fromT: controls.target.clone(), toT: target, fromC: camera.position.clone(), toC: camEnd };
+}
+function stepFlight(now) {
+  if (!flight) return;
+  const k = Math.min((now - flight.t0) / flight.dur, 1);
+  const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  controls.target.lerpVectors(flight.fromT, flight.toT, e);
+  camera.position.lerpVectors(flight.fromC, flight.toC, e);
+  if (k >= 1) flight = null;
+}
+
+/* ------------------------------------------------------------------
+   XR: συνεδρία, τοποθέτηση μακέτας, περιήγηση 1:1, μενού στον χώρο
+   ------------------------------------------------------------------ */
+const handFactory = new XRHandModelFactory();
+const controllers = [];
+const raycaster = new THREE.Raycaster();
+const tmpMat = new THREE.Matrix4();
+const head = { pos: new THREE.Vector3(), quat: new THREE.Quaternion(), yaw: 0 };
+
+for (let i = 0; i < 2; i++) {
+  const ctrl = renderer.xr.getController(i);
+  const ray = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)]),
+    new THREE.LineBasicMaterial({ color: 0xF2F4F5, transparent: true, opacity: 0.75 }));
+  ray.scale.z = 2;
+  ray.visible = false;
+  ctrl.add(ray);
+  const cursor = new THREE.Mesh(new THREE.RingGeometry(0.006, 0.011, 24), new THREE.MeshBasicMaterial({ color: 0xF2F4F5, depthTest: false, transparent: true }));
+  cursor.renderOrder = 30;
+  cursor.visible = false;
+  scene.add(cursor);
+  const entry = { ctrl, ray, cursor, source: null, hover: null };
+  ctrl.addEventListener('connected', (e) => { entry.source = e.data; ray.visible = e.data.targetRayMode === 'tracked-pointer'; });
+  ctrl.addEventListener('disconnected', () => { entry.source = null; ray.visible = false; cursor.visible = false; });
+  ctrl.addEventListener('selectstart', () => onSelect(entry));
+  ctrl.addEventListener('squeezestart', () => placeMenu());
+  scene.add(ctrl);
+  const hand = renderer.xr.getHand(i);
+  hand.add(handFactory.createHandModel(hand, 'spheres'));
+  scene.add(hand);
+  entry.hand = hand;
+  controllers.push(entry);
+}
+
+function readHead() {
+  const cam = renderer.xr.getCamera();
+  cam.matrixWorld.decompose(head.pos, head.quat, _s);
+  const f = new THREE.Vector3(0, 0, -1).applyQuaternion(head.quat);
+  head.yaw = Math.atan2(f.x, -f.z);
+}
+const forwardOf = (yaw) => new THREE.Vector3(Math.sin(yaw), 0, -Math.cos(yaw));
+const floorY = () => (xr.refType === 'local-floor' ? 0 : head.pos.y - 1.6);
+
+function placeWorld(scale, phi, pivot, target) {
+  world.scale.setScalar(scale);
+  world.rotation.set(0, phi, 0);
+  const rotated = pivot.clone().multiplyScalar(scale).applyAxisAngle(YAX, phi);
+  world.position.copy(target).sub(rotated);
+}
+function placeTable() {
+  readHead();
+  const t = xr.table;
+  const yTable = (xr.refType === 'local-floor' ? 0.82 : head.pos.y - 0.62) + t.dy;
+  const target = head.pos.clone().addScaledVector(forwardOf(head.yaw), 0.9);
+  target.y = yTable;
+  placeWorld(t.scale, -head.yaw + t.rot, new THREE.Vector3(...site().pivot), target);
+}
+function teleport(poi) {
+  readHead();
+  const stand = new THREE.Vector3(...(poi.stand || poi.p));
+  const phi = THREE.MathUtils.degToRad(poi.yaw) - head.yaw;
+  placeWorld(1, phi, stand, new THREE.Vector3(head.pos.x, floorY(), head.pos.z));
+}
+
+// Μενού: ένας καμβάς 1024×1360 σε επίπεδο 0,36 × 0,48 μ.
+const MENU_W = 1024, MENU_H = 1360, MENU_M = 0.36;
+const menuCanvas = document.createElement('canvas');
+menuCanvas.width = MENU_W; menuCanvas.height = MENU_H;
+const menuTex = canvasTexture(menuCanvas);
+const menu = new THREE.Mesh(new THREE.PlaneGeometry(MENU_M, MENU_M * MENU_H / MENU_W), new THREE.MeshBasicMaterial({ map: menuTex, transparent: true, depthTest: false }));
+menu.renderOrder = 20;
+menu.visible = false;
+scene.add(menu);
+let menuButtons = [];
+
+function wrap(g, text, maxW) {
+  const words = text.split(' '); const lines = []; let line = '';
+  for (const w of words) {
+    const test = line ? `${line} ${w}` : w;
+    if (g.measureText(test).width > maxW && line) { lines.push(line); line = w; } else line = test;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function drawMenu() {
+  if (!xr.session) return;
+  const s = site();
+  const g = menuCanvas.getContext('2d');
+  const hovered = new Set(controllers.map((c) => c.hover).filter(Boolean));
+  menuButtons = [];
+  g.clearRect(0, 0, MENU_W, MENU_H);
+  g.fillStyle = 'rgba(24,30,33,0.92)'; roundRect(g, 0, 0, MENU_W, MENU_H, 22); g.fill();
+  g.fillStyle = '#F2F4F5'; g.textBaseline = 'alphabetic';
+  g.font = `700 54px ${DISPLAY_FONT}`; g.fillText(s.title, 40, 78);
+  g.font = `400 26px ${UI_FONT}`; g.fillStyle = '#AEBAC0'; g.textAlign = 'right';
+  g.fillText(xr.mode === 'table' ? `Μακέτα, κλίμακα 1:${Math.round(1 / xr.table.scale)}` : 'Φυσικό μέγεθος, 1:1', MENU_W - 40, 74);
+  g.textAlign = 'left';
+
+  const section = (y, text) => { g.font = `600 24px ${UI_FONT}`; g.fillStyle = '#9FB0B9'; g.fillText(text, 40, y); };
+  const button = (id, text, x, y, w, h, { active = false, disabled = false } = {}) => {
+    const hov = hovered.has(id) && !disabled;
+    g.fillStyle = active ? '#3E78B0' : hov ? '#4A5B66' : '#33414A';
+    if (disabled) g.fillStyle = '#262F35';
+    roundRect(g, x, y, w, h, 8); g.fill();
+    if (hov) { g.strokeStyle = '#F2F4F5'; g.lineWidth = 3; roundRect(g, x + 1.5, y + 1.5, w - 3, h - 3, 7); g.stroke(); }
+    g.font = `500 27px ${UI_FONT}`; g.fillStyle = disabled ? '#6E7B82' : '#F4F6F7'; g.textBaseline = 'middle';
+    const lines = wrap(g, text, w - 24);
+    lines.slice(0, 2).forEach((ln, i) => g.fillText(ln, x + 14, y + h / 2 + (i - (Math.min(lines.length, 2) - 1) / 2) * 30));
+    g.textBaseline = 'alphabetic';
+    if (!disabled) menuButtons.push({ id, x, y, w, h });
+  };
+  const L = 40, Wd = MENU_W - 80, gap = 12;
+  const half = (Wd - gap) / 2, third = (Wd - 2 * gap) / 3, quarter = (Wd - 3 * gap) / 4;
+
+  section(132, 'Χώρος');
+  SITE_IDS.forEach((id, i) => button(`site:${id}`, SITES[id].short, L + i * (third + gap), 146, third, 58, { active: state.site === id }));
+
+  section(236, 'Λειτουργία');
+  button('mode:table', 'Μακέτα', L, 250, half, 58, { active: xr.mode === 'table' });
+  button('mode:walk', 'Περιήγηση 1:1', L + half + gap, 250, half, 58, { active: xr.mode === 'walk' });
+
+  section(350, 'Προβολή');
+  button('view:today', 'Σήμερα', L, 364, half, 58, { active: state.view === 'today' });
+  button('view:recon', 'Αναπαράσταση', L + half + gap, 364, half, 58, { active: state.view === 'recon' });
+  let slot = 0;
+  if (s.toggle === 'evans') button('tog:evans', 'Επεμβάσεις Evans', L + (slot++) * (half + gap), 434, half, 58, { active: state.evans });
+  if (s.toggle === 'section') button('tog:section', 'Τομή κατά μήκος', L + (slot++) * (half + gap), 434, half, 58, { active: state.section });
+  button('tog:labels', 'Ετικέτες', L + slot * (half + gap), 434, half, 58, { active: state.labels });
+
+  section(534, 'Μακέτα');
+  const off = xr.mode !== 'table';
+  button('tbl:rotl', 'Στροφή αριστερά', L, 548, third, 58, { disabled: off });
+  button('tbl:rotr', 'Στροφή δεξιά', L + third + gap, 548, third, 58, { disabled: off });
+  button('tbl:here', 'Μπροστά μου', L + 2 * (third + gap), 548, third, 58, { disabled: off });
+  button('tbl:smaller', 'Μικρότερη', L, 618, quarter, 58, { disabled: off });
+  button('tbl:bigger', 'Μεγαλύτερη', L + (quarter + gap), 618, quarter, 58, { disabled: off });
+  button('tbl:down', 'Χαμηλότερα', L + 2 * (quarter + gap), 618, quarter, 58, { disabled: off });
+  button('tbl:up', 'Ψηλότερα', L + 3 * (quarter + gap), 618, quarter, 58, { disabled: off });
+
+  section(718, xr.mode === 'walk' ? 'Μετάβαση σε σημείο' : 'Σημεία');
+  s.teleport.forEach((id, i) => {
+    const r = Math.floor(i / 2), cI = i % 2;
+    button(`poi:${id}`, s.POI[id].name, L + cI * (half + gap), 732 + r * 62, half, 54, { active: s.selected === id });
+  });
+
+  const poi = s.POI[s.selected];
+  const infoY = 1074;
+  g.fillStyle = '#F2F4F5'; g.font = `700 32px ${DISPLAY_FONT}`;
+  g.fillText(poi.name, L, infoY);
+  g.font = `400 24px ${UI_FONT}`; g.fillStyle = '#D5DCE0';
+  const lines = wrap(g, poi.text, Wd);
+  if (lines.length > 6) { lines.length = 6; lines[5] = lines[5].replace(/\s*\S*$/, ' …'); }
+  lines.forEach((ln, i) => g.fillText(ln, L, infoY + 36 + i * 29));
+  button('exit', 'Έξοδος', MENU_W - 40 - 170, MENU_H - 78, 170, 54);
+  menuTex.needsUpdate = true;
+}
+function placeMenu() {
+  if (!xr.session) return;
+  readHead();
+  const f = forwardOf(head.yaw);
+  const left = new THREE.Vector3(-f.z, 0, f.x).multiplyScalar(-1);
+  menu.position.copy(head.pos).addScaledVector(f, 0.62).addScaledVector(left, 0.3);
+  menu.position.y = head.pos.y - 0.14;
+  menu.lookAt(head.pos);
+}
+
+function runAction(id) {
+  const s = site();
+  if (id.startsWith('site:')) { requestSite(id.slice(5)); return; }
+  if (id === 'mode:table') { xr.mode = 'table'; if (s.toggle === 'section') setSection(true); placeTable(); }
+  else if (id === 'mode:walk') {
+    xr.mode = 'walk';
+    if (s.toggle === 'section') setSection(false);
+    const sel = s.POI[s.selected];
+    teleport(sel.stand ? sel : s.POI[s.teleport[0]]);
+  }
+  else if (id === 'view:today') setView('today');
+  else if (id === 'view:recon') setView('recon');
+  else if (id === 'tog:evans') setEvans(!state.evans);
+  else if (id === 'tog:section') setSection(!state.section);
+  else if (id === 'tog:labels') setLabels(!state.labels);
+  else if (id.startsWith('tbl:')) {
+    const t = xr.table, step = id.slice(4);
+    if (step === 'rotl') t.rot -= Math.PI / 8;
+    if (step === 'rotr') t.rot += Math.PI / 8;
+    if (step === 'smaller') t.scale = Math.max(s.tableMin, t.scale / 1.25);
+    if (step === 'bigger') t.scale = Math.min(s.tableMax, t.scale * 1.25);
+    if (step === 'down') t.dy -= 0.05;
+    if (step === 'up') t.dy += 0.05;
+    placeTable();
+  }
+  else if (id.startsWith('poi:')) {
+    const poi = s.POI[id.slice(4)];
+    selectPoi(poi.id);
+    if (xr.mode === 'walk') teleport(poi);
+  }
+  else if (id === 'exit') xr.session?.end();
+  drawMenu();
+}
+function hitTest(entry) {
+  tmpMat.identity().extractRotation(entry.ctrl.matrixWorld);
+  raycaster.ray.origin.setFromMatrixPosition(entry.ctrl.matrixWorld);
+  raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tmpMat);
+  if (menu.visible) {
+    const hit = raycaster.intersectObject(menu, false)[0];
+    if (hit && hit.uv) {
+      const px = hit.uv.x * MENU_W, py = (1 - hit.uv.y) * MENU_H;
+      const b = menuButtons.find((m) => px >= m.x && px <= m.x + m.w && py >= m.y && py <= m.y + m.h);
+      return { point: hit.point, distance: hit.distance, button: b ? b.id : null, onMenu: true };
+    }
+  }
+  if (state.labels) {
+    const hit = raycaster.intersectObjects(visibleLabels(), false)[0];
+    if (hit) return { point: hit.point, distance: hit.distance, poi: hit.object.userData.poi };
+  }
+  return null;
+}
+function onSelect(entry) {
+  if (!xr.session) return;
+  const hit = hitTest(entry);
+  if (!hit) return;
+  if (hit.button) runAction(hit.button);
+  else if (hit.poi) selectPoi(hit.poi);
+}
+function updatePointers() {
+  let changed = false;
+  for (const entry of controllers) {
+    if (!entry.source || entry.source.targetRayMode !== 'tracked-pointer') { entry.cursor.visible = false; continue; }
+    const hit = hitTest(entry);
+    const hov = hit && hit.button ? hit.button : null;
+    if (hov !== entry.hover) { entry.hover = hov; changed = true; }
+    entry.ray.scale.z = hit ? hit.distance : 3;
+    entry.cursor.visible = !!hit;
+    if (hit) { entry.cursor.position.copy(hit.point); entry.cursor.lookAt(head.pos); }
+  }
+  if (changed) drawMenu();
+}
+
+async function enterXR(kind) {
+  const type = kind === 'vr' ? 'immersive-vr' : 'immersive-ar';
+  try {
+    const session = await navigator.xr.requestSession(type, { optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking'] });
+    let ref = 'local-floor';
+    try { await session.requestReferenceSpace('local-floor'); } catch (e) { ref = 'local'; }
+    xr.refType = ref;
+    renderer.xr.setReferenceSpaceType(ref);
+    await renderer.xr.setSession(session);
+    xr.session = session; xr.kind = kind; xr.mode = 'table'; xr.needsPlacement = 3;
+    xr.table = { scale: site().table, rot: 0, dy: 0 };
+    if (site().toggle === 'section') setSection(true);
+    session.addEventListener('end', onXREnd);
+    scene.background = kind === 'ar' ? null : sceneColor();
+    sun.castShadow = false;
+    camera.near = 0.02; camera.far = 1500; camera.updateProjectionMatrix();
+    controls.enabled = false;
+    controllers.forEach((c) => { c.hand.visible = kind === 'vr'; });
+    menu.visible = true;
+    drawMenu();
+    note('');
+  } catch (err) {
+    note('Ο browser δεν επέτρεψε τη συνεδρία XR. Ανοίξτε την εφαρμογή απευθείας από τη διεύθυνσή της στο GitHub Pages, μέσα στον browser των γυαλιών.', true);
+  }
+}
+function onXREnd() {
+  xr.session = null; xr.kind = null;
+  world.position.set(0, 0, 0); world.rotation.set(0, 0, 0); world.scale.setScalar(1);
+  menu.visible = false;
+  controllers.forEach((c) => { c.cursor.visible = false; c.hover = null; });
+  scene.background = sceneColor();
+  sun.castShadow = true;
+  camera.near = 0.5; camera.far = 3000; camera.updateProjectionMatrix();
+  controls.enabled = true;
+  resize();
+}
+
+/* ------------------------------------------------------------------
+   Θέμα, μέγεθος, βρόχος απόδοσης
+   ------------------------------------------------------------------ */
+function sceneColor() {
+  const v = getComputedStyle(document.documentElement).getPropertyValue('--scene').trim() || '#DCE2E5';
+  return new THREE.Color(v);
+}
+function refreshTheme() { if (!(xr.session && xr.kind === 'ar')) scene.background = sceneColor(); }
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', refreshTheme);
+new MutationObserver(refreshTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+function resize() {
+  if (renderer.xr.isPresenting) return;
+  const w = Math.max(stage.clientWidth, 1), h = Math.max(stage.clientHeight, 1);
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+
+renderer.setAnimationLoop(() => {
+  if (renderer.xr.isPresenting) {
+    if (xr.needsPlacement > 0 && --xr.needsPlacement === 0) { placeTable(); placeMenu(); drawMenu(); }
+    readHead();
+    updatePointers();
+  } else {
+    stepFlight(performance.now());
+    controls.update();
+  }
+  for (const s of builtSites()) s.onFrame?.();
+  updateLabels();
+  renderer.render(scene, camera);
+});
+
+/* ------------------------------------------------------------------
+   Αλλαγή χώρου
+   ------------------------------------------------------------------ */
+function ensureBuilt(s) {
+  if (s.root) return;
+  s.root = new THREE.Group();
+  s.today = new THREE.Group();
+  s.recon = new THREE.Group();
+  s.recon.visible = false;
+  s.root.add(s.today, s.recon);
+  s.root.visible = false;
+  world.add(s.root);
+  seed = 11;
+  cur = newCtx();
+  s.build(s);
+  buildBoxes(s);
+  cur = null;
+  s.POI = Object.fromEntries(s.pois.map((p) => [p.id, p]));
+  buildLabels(s);
+  s.selected = s.first;
+}
+function placeSun(s) {
+  const k = s.shadow.half / 140;
+  sun.target.position.set(s.shadow.x, 0, s.shadow.z);
+  sun.position.set(s.shadow.x - 70 * k, 140 * k, s.shadow.z + 90 * k);
+  Object.assign(sun.shadow.camera, { left: -s.shadow.half, right: s.shadow.half, top: s.shadow.half, bottom: -s.shadow.half, near: 10 * k, far: 420 * k });
+  sun.shadow.camera.updateProjectionMatrix();
+}
+function setSite(id, initial = false) {
+  const s = SITES[id] || SITES.knossos;
+  ensureBuilt(s);
+  state.site = s.id;
+  for (const k of SITE_IDS) if (SITES[k].root) SITES[k].root.visible = k === s.id;
+  document.getElementById('siteTitle').textContent = s.title;
+  document.getElementById('siteLead').textContent = s.lead;
+  document.getElementById('stage').setAttribute('aria-label', s.aria);
+  document.getElementById('h-poi').textContent = s.poisHeading;
+  document.getElementById('siteFoot').innerHTML = s.foot;
+  document.title = s.title;
+  document.querySelectorAll('[data-site]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.site === s.id)));
+  document.getElementById('rowEvans').hidden = s.toggle !== 'evans';
+  document.getElementById('rowSection').hidden = s.toggle !== 'section';
+  document.querySelectorAll('[data-legend]').forEach((li) => { li.hidden = !s.legend.includes(li.dataset.legend); });
+  buildPoiList(s);
+  if (!initial) {
+    try {
+      const u = new URL(location.href);
+      if (s.id === 'knossos') u.searchParams.delete('site'); else u.searchParams.set('site', s.id);
+      history.replaceState(null, '', u);
+    } catch (e) { /* τοπικό αρχείο */ }
+  }
+  controls.minDistance = s.cam.min;
+  controls.maxDistance = s.cam.max;
+  if (!xr.session) {
+    // Σε στενή, όρθια οθόνη η κάμερα απομακρύνεται για να χωρά η μακέτα
+    flight = null;
+    const fit = Math.max(1, 1.2 / camera.aspect);
+    controls.target.set(...s.cam.target);
+    camera.position.set(...s.cam.pos).sub(controls.target).multiplyScalar(fit).add(controls.target);
+  }
+  placeSun(s);
+  setView(state.view);
+  setSection(state.section);
+  if (xr.session) {
+    xr.table = { scale: s.table, rot: 0, dy: 0 };
+    if (xr.mode === 'table') { if (s.toggle === 'section') setSection(true); placeTable(); }
+    else { if (s.toggle === 'section') setSection(false); teleport(s.POI[s.teleport[0]]); }
+  }
+  selectPoi(s.selected);
+}
+function requestSite(id) {
+  const s = SITES[id];
+  if (!s || s.id === state.site) return;
+  if (s.root) { setSite(id); return; }
+  const wait = document.getElementById('stageWait');
+  wait.hidden = false;
+  setTimeout(() => { setSite(id); wait.hidden = true; }, 30);
+}
+
+/* ------------------------------------------------------------------
+   Πάνελ της σελίδας
+   ------------------------------------------------------------------ */
+function note(text, warn = false) {
+  const el = document.getElementById('xrNote');
+  el.textContent = text;
+  el.classList.toggle('warn', warn);
+}
+function buildPoiList(s) {
+  const host = document.getElementById('poiList');
+  host.replaceChildren();
+  for (const grp of s.groups) {
+    const boxEl = document.createElement('div');
+    boxEl.className = 'poi-group';
+    const h = document.createElement('h3');
+    h.textContent = grp;
+    boxEl.append(h);
+    for (const poi of s.pois.filter((p) => p.group === grp)) {
+      const b = document.createElement('button');
+      b.className = 'poi';
+      b.type = 'button';
+      b.id = `poi-${poi.id}`;
+      b.dataset.poi = poi.id;
+      b.textContent = poi.name;
+      b.setAttribute('aria-current', String(s.selected === poi.id));
+      b.addEventListener('click', () => selectPoi(poi.id, true));
+      boxEl.append(b);
+    }
+    host.append(boxEl);
+  }
+}
+function bindPanel() {
+  document.querySelectorAll('[data-site]').forEach((b) => b.addEventListener('click', () => requestSite(b.dataset.site)));
+  document.getElementById('vToday').addEventListener('click', () => setView('today'));
+  document.getElementById('vRecon').addEventListener('click', () => setView('recon'));
+  document.getElementById('chkEvans').addEventListener('change', (e) => setEvans(e.target.checked));
+  document.getElementById('chkSection').addEventListener('change', (e) => setSection(e.target.checked));
+  document.getElementById('chkLabels').addEventListener('change', (e) => setLabels(e.target.checked));
+  document.getElementById('btnVR').addEventListener('click', () => enterXR('vr'));
+  document.getElementById('btnAR').addEventListener('click', () => enterXR('ar'));
+}
+
+// Επιλογή ετικέτας με κλικ στην επιφάνεια εργασίας
+const down = new THREE.Vector2();
+renderer.domElement.addEventListener('pointerdown', (e) => down.set(e.clientX, e.clientY));
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (renderer.xr.isPresenting || !state.labels) return;
+  if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  const ndc = new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  const hit = raycaster.intersectObjects(visibleLabels(), false)[0];
+  if (hit) selectPoi(hit.object.userData.poi, true);
+});
+
+async function checkXR() {
+  const vr = document.getElementById('btnVR'), ar = document.getElementById('btnAR');
+  if (!('xr' in navigator)) { note('Αυτός ο browser δεν υποστηρίζει WebXR. Ανοίξτε τη σελίδα από τον browser του Meta Quest 3 ή του Magic Leap 2.'); return; }
+  const [okVR, okAR] = await Promise.all([
+    navigator.xr.isSessionSupported('immersive-vr').catch(() => false),
+    navigator.xr.isSessionSupported('immersive-ar').catch(() => false),
+  ]);
+  vr.disabled = !okVR; ar.disabled = !okAR;
+  if (okVR || okAR) note('Η συσκευή υποστηρίζει ' + [okVR && 'VR', okAR && 'AR'].filter(Boolean).join(' και ') + '. Στο μενού μέσα στα γυαλιά επιλέγετε χώρο, μακέτα ή περιήγηση 1:1.');
+  else note('Δεν βρέθηκαν γυαλιά XR. Ανοίξτε τη σελίδα από τον browser του Meta Quest 3 ή του Magic Leap 2.');
+}
+
+/* ==================================================================
+   ΚΝΩΣΟΣ
+   Συντεταγμένες σε μέτρα: x προς ανατολή, z προς νότο,
+   αρχή στο κέντρο της Κεντρικής Αυλής, y = 0 στο επίπεδο της αυλής.
+   ================================================================== */
+const K_POIS = [
   { id: 'westcourt', group: 'Δυτική πλευρά', name: 'Δυτική Αυλή', p: [-72, 0, -16], stand: [-76, 0, -20], yaw: 90,
     text: 'Λιθόστρωτη αυλή μπροστά στη δυτική πρόσοψη. Ήταν η επίσημη προσέγγιση στο ανάκτορο και χώρος τελετών. Τη διασχίζουν υπερυψωμένοι διάδρομοι και σε αυτήν βρίσκονται τρεις μεγάλοι κυκλικοί λάκκοι, οι κουλούρες.' },
   { id: 'westporch', group: 'Δυτική πλευρά', name: 'Δυτικό Πρόπυλο', p: [-48, 0, 27], stand: [-54, 0, 27], yaw: 90,
@@ -213,51 +1263,8 @@ const POIS = [
   { id: 'southentrance', group: 'Νότια πλευρά', name: 'Νότια Είσοδος', p: [-5.5, 0, 33], stand: [-5.5, 0, 40], yaw: 0,
     text: 'Εδώ βρίσκεται αντίγραφο της τοιχογραφίας του «Πρίγκιπα με τα κρίνα». Τα πρωτότυπα των τοιχογραφιών φυλάσσονται στο Αρχαιολογικό Μουσείο Ηρακλείου.' },
 ];
-const POI = Object.fromEntries(POIS.map((p) => [p.id, p]));
-const GROUP_ORDER = ['Κέντρο', 'Δυτική πλευρά', 'Βόρεια πλευρά', 'Ανατολική πτέρυγα', 'Νότια πλευρά'];
-const TELEPORT = ['court', 'westcourt', 'westporch', 'magazines', 'throne', 'north', 'theatral', 'grandstair', 'doubleaxes', 'southprop'];
-const MODEL_PIVOT = new THREE.Vector3(-30, 0, -20); // κέντρο της βάσης της μακέτας
 
-/* ------------------------------------------------------------------
-   Δεδομένα του μοντέλου
-   walls: κουτιά με ύψος σήμερα (h) και ύψος στην αναπαράσταση (H)
-   ------------------------------------------------------------------ */
-const WALL_T = 0.8;
-const walls = [];
-const fixed = {};
-const cols = [];
-const pithoi = [];
-const horns = [];
-
-function box(key, cx, cy, cz, lx, ly, lz) { (fixed[key] ||= []).push([cx, cy, cz, lx, ly, lz]); }
-function block(cx, cz, lx, lz, o) { walls.push({ cx, cz, lx, lz, y0: o.y0 ?? 0, h: o.h ?? 1.2, H: o.H ?? o.h ?? 1.2, evans: !!o.evans }); }
-function seg(x0, z0, x1, z1, t, o) {
-  const horiz = Math.abs(z1 - z0) < 1e-6;
-  const len = horiz ? Math.abs(x1 - x0) : Math.abs(z1 - z0);
-  if (len < 0.05) return;
-  block((x0 + x1) / 2, (z0 + z1) / 2, horiz ? len : t, horiz ? t : len, o);
-}
-function wallRun(a0, a1, fixedCoord, horiz, t, doors, o) {
-  const cuts = doors.map(([c, w]) => [c - w / 2, c + w / 2]).sort((p, q) => p[0] - q[0]);
-  let s = a0;
-  const emit = (p, q) => (horiz ? seg(p, fixedCoord, q, fixedCoord, t, o) : seg(fixedCoord, p, fixedCoord, q, t, o));
-  for (const [d0, d1] of cuts) {
-    if (d0 > s) emit(s, Math.min(d0, a1));
-    s = Math.max(s, d1);
-  }
-  if (s < a1) emit(s, a1);
-}
-function room(x0, z0, x1, z1, o = {}) {
-  const t = o.t ?? WALL_T, half = t / 2, d = o.doors || {}, skip = o.skip || '';
-  if (!skip.includes('n')) wallRun(x0, x1, z0 + half, true, t, d.n || [], o);
-  if (!skip.includes('s')) wallRun(x0, x1, z1 - half, true, t, d.s || [], o);
-  if (!skip.includes('w')) wallRun(z0 + t, z1 - t, x0 + half, false, t, d.w || [], o);
-  if (!skip.includes('e')) wallRun(z0 + t, z1 - t, x1 - half, false, t, d.e || [], o);
-}
-function pillar(x, z, o) { block(x, z, o.s ?? 0.8, o.s ?? 0.8, o); }
-function col(x, z, o) { cols.push({ x, z, y0: o.y0 ?? 0, ht: o.ht ?? 0, H: o.H ?? 3.2 }); }
-
-function buildData() {
+function buildKnossosData() {
   // Βάση της μακέτας: πλάτωμα στο επίπεδο της αυλής, βύθισμα της ανατολικής πτέρυγας, χαμηλότερο έδαφος ανατολικά.
   box('ground', -57, -4, -20, 146, 8, 160);
   box('ground', 31, -4, -50.5, 30, 8, 99);
@@ -297,7 +1304,7 @@ function buildData() {
     const zc = MZ0 + (k + 0.5) * bay;
     magDoors.push([zc, 1.3]);
     if (k > 0) seg(MX0 + 1.4, MZ0 + k * bay, MX1 - 0.9, MZ0 + k * bay, 0.9, mag);
-    for (const px of [-44, -40, -36]) pithoi.push({ x: px, z: zc, y0: 0, s: 1 });
+    for (const px of [-44, -40, -36]) cur.pithoi.push({ x: px, z: zc, y0: 0, s: 1 });
   }
   wallRun(MZ0 + 0.9, MZ1 - 0.9, MX1 - 0.45, false, 0.9, magDoors, mag);
 
@@ -326,7 +1333,7 @@ function buildData() {
   room(-25.5, 1, -12.5, 8, { h: 1.2, H: 7, doors: { e: [[4.5, 2]] } });
   room(-25.5, 8, -12.5, 15, { h: 1.2, H: 7 });
   room(-25.5, 15, -12.5, 25, { h: 1.2, H: 7 });
-  for (let z = -23; z <= 23; z += 3.6) if (z < -8.5 || z > -0.5) horns.push({ x: -12.9, y: 7, z });
+  for (let z = -23; z <= 23; z += 3.6) if (z < -8.5 || z > -0.5) cur.horns.push({ x: -12.9, y: 7, z });
 
   // Βορειοδυτικά και βόρεια
   room(-25.5, -34, -12.5, -25, { h: 1.2, H: 7 });
@@ -363,7 +1370,7 @@ function buildData() {
   room(12.5, -14, 20, -2, { h: 1.2, H: 7, doors: { w: [[-8, 2]] } });
   room(20, -34, 28, -24, { h: 1.2, H: 7 });
   room(20, -24, 28, -12, { h: 1.6, H: 6.4 });
-  for (const z of [-21.4, -18, -14.6]) for (const x of [22.3, 25.7]) pithoi.push({ x, z, y0: 0, s: 1.35 });
+  for (const z of [-21.4, -18, -14.6]) for (const x of [22.3, 25.7]) cur.pithoi.push({ x, z, y0: 0, s: 1.35 });
   room(20, -12, 28, -2, { h: 1.2, H: 7 });
   room(28, -34, 44, -20, { h: 1.2, H: 7 });
   room(28, -20, 44, -8, { h: 1.2, H: 7 });
@@ -436,123 +1443,8 @@ function buildData() {
   box('panelRed', -7.57, 1.7, 30, 0.06, 1.6, 2.6);              // θέση του «Πρίγκιπα με τα κρίνα»
 }
 
-/* ------------------------------------------------------------------
-   Σκηνή και υλικά
-   ------------------------------------------------------------------ */
-const stage = document.getElementById('stage');
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.xr.enabled = true;
-stage.prepend(renderer.domElement);
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(42, 1, 0.5, 3000);
-camera.position.set(-100, 92, 104);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(-14, 0, -16);
-controls.enableDamping = true;
-controls.maxPolarAngle = 1.42;
-controls.minDistance = 12;
-controls.maxDistance = 520;
-
-scene.add(new THREE.HemisphereLight(0xEEF3F8, 0x8A7958, 1.15));
-const sun = new THREE.DirectionalLight(0xFFF1DC, 1.7);
-sun.position.set(-90, 140, 70);
-sun.target.position.set(-20, 0, -20);
-sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -140, right: 140, top: 140, bottom: -140, near: 10, far: 420 });
-sun.shadow.bias = -0.0006;
-scene.add(sun, sun.target);
-
-const world = new THREE.Group();
-scene.add(world);
-const today = new THREE.Group();
-const recon = new THREE.Group();
-recon.visible = false;
-world.add(today, recon);
-
-const HEX = {
-  ground: 0xB29C74, pave: 0xD3C5A6, court: 0xDCCFB1, road: 0xC5B48F, steps: 0xCFC1A1, pit: 0x564B3D,
-  stone: 0xCBB792, plaster: 0xEBDFC7, evans: 0x7F9FBF, red: 0xA2382B, dark: 0x2C2622,
-  pithos: 0xB7764A, horn: 0xF1E9D8, panelRed: 0xB0533B, panelOchre: 0xC48E45, panelBlue: 0x4C7EA8,
-};
-const mat = (hex) => new THREE.MeshLambertMaterial({ color: hex });
-const M = {};
-for (const k of ['ground', 'pave', 'court', 'road', 'steps', 'pit', 'stone', 'plaster', 'pithos', 'horn', 'panelRed', 'panelOchre', 'panelBlue']) M[k] = mat(HEX[k]);
-M.evansToday = mat(HEX.evans);
-M.evansRecon = mat(HEX.evans);
-M.shaftToday = mat(HEX.red);
-M.capToday = mat(HEX.dark);
-M.shaftRecon = mat(HEX.red);
-M.capRecon = mat(HEX.dark);
-
-let seed = 11;
-const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-const unitBox = new THREE.BoxGeometry(1, 1, 1);
-const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _p = new THREE.Vector3(), _c = new THREE.Color();
-
-function instanced(geom, material, items, toMatrix, vary = 0.1) {
-  const mesh = new THREE.InstancedMesh(geom, material, Math.max(items.length, 1));
-  items.forEach((it, i) => {
-    toMatrix(it, _m);
-    mesh.setMatrixAt(i, _m);
-    const k = 1 - vary / 2 + rnd() * vary;
-    mesh.setColorAt(i, _c.setRGB(k, k, k));
-  });
-  mesh.count = items.length;
-  mesh.instanceMatrix.needsUpdate = true;
-  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  mesh.frustumCulled = false;
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  return mesh;
-}
-const boxMatrix = (b, m) => m.compose(_p.set(b[0], b[1], b[2]), _q.identity(), _s.set(b[3], b[4], b[5]));
-
-function buildMeshes() {
-  for (const [key, list] of Object.entries(fixed)) {
-    const mesh = instanced(unitBox, M[key], list, boxMatrix, key === 'ground' ? 0 : 0.08);
-    if (key === 'ground' || key === 'court' || key === 'pave' || key === 'road') mesh.castShadow = false;
-    world.add(mesh);
-  }
-
-  const T = (w, y0, hh) => [w.cx, y0 + hh / 2, w.cz, w.lx, hh, w.lz];
-  today.add(instanced(unitBox, M.stone, walls.filter((w) => !w.evans && w.h > 0).map((w) => T(w, w.y0, w.h)), boxMatrix));
-  today.add(instanced(unitBox, M.evansToday, walls.filter((w) => w.evans && w.h > 0).map((w) => T(w, w.y0, w.h)), boxMatrix));
-  recon.add(instanced(unitBox, M.stone, walls.filter((w) => !w.evans && w.h > 0).map((w) => T(w, w.y0, Math.min(w.h, w.H))), boxMatrix));
-  recon.add(instanced(unitBox, M.plaster, walls.filter((w) => !w.evans && w.H > w.h).map((w) => T(w, w.y0 + w.h, w.H - w.h)), boxMatrix));
-  recon.add(instanced(unitBox, M.evansRecon, walls.filter((w) => w.evans).map((w) => T(w, w.y0, Math.max(w.h, w.H))), boxMatrix));
-
-  // Μινωικοί κίονες: κορμός που στενεύει προς τα κάτω, κιονόκρανο και άβακας
-  const shaft = new THREE.CylinderGeometry(0.3, 0.22, 1, 14).translate(0, 0.5, 0);
-  const capital = mergeGeometries([
-    new THREE.CylinderGeometry(0.42, 0.34, 0.26, 14).translate(0, 0.13, 0),
-    new THREE.BoxGeometry(0.95, 0.18, 0.95).translate(0, 0.35, 0),
-  ]);
-  const colSet = (list, heightOf, shaftMat, capMat, group) => {
-    group.add(instanced(shaft, shaftMat, list, (c, m) => m.compose(_p.set(c.x, c.y0, c.z), _q.identity(), _s.set(1, Math.max(heightOf(c) - 0.44, 0.1), 1)), 0.06));
-    group.add(instanced(capital, capMat, list, (c, m) => m.compose(_p.set(c.x, c.y0 + Math.max(heightOf(c) - 0.44, 0.1), c.z), _q.identity(), _s.set(1, 1, 1)), 0.04));
-  };
-  colSet(cols.filter((c) => c.ht > 0), (c) => c.ht, M.shaftToday, M.capToday, today);
-  colSet(cols.filter((c) => c.H > 0), (c) => c.H, M.shaftRecon, M.capRecon, recon);
-
-  // Πιθάρια
-  const profile = [[0, 0], [0.2, 0], [0.3, 0.12], [0.42, 0.55], [0.45, 0.92], [0.39, 1.22], [0.27, 1.42], [0.27, 1.5], [0.32, 1.54], [0.29, 1.58], [0, 1.58]].map(([r, y]) => new THREE.Vector2(r, y));
-  const pithosGeom = new THREE.LatheGeometry(profile, 16);
-  world.add(instanced(pithosGeom, M.pithos, pithoi, (p, m) => m.compose(_p.set(p.x, p.y0, p.z), _q.identity(), _s.setScalar(p.s)), 0.14));
-
-  // Κέρατα καθοσιώσεως στο στηθαίο της δυτικής πτέρυγας (μόνο στην αναπαράσταση)
-  const hs = new THREE.Shape();
-  hs.moveTo(-0.55, 0); hs.lineTo(0.55, 0); hs.lineTo(0.55, 0.78); hs.lineTo(0.4, 0.78); hs.lineTo(0.28, 0.24);
-  hs.lineTo(-0.28, 0.24); hs.lineTo(-0.4, 0.78); hs.lineTo(-0.55, 0.78); hs.closePath();
-  const hornGeom = new THREE.ExtrudeGeometry(hs, { depth: 0.3, bevelEnabled: false }).translate(0, 0, -0.15);
-  const qHorn = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-  recon.add(instanced(hornGeom, M.horn, horns, (h, m) => m.compose(_p.set(h.x, h.y, h.z), qHorn, _s.setScalar(1.25)), 0));
-
+function buildKnossos(s) {
+  buildKnossosData();
   // Κουλούρες της Δυτικής Αυλής
   for (const [x, z, r] of [[-66, -8, 2.6], [-70, 4, 3.3], [-74, 16, 3.0]]) {
     const disc = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.04, 40), M.pit);
@@ -562,582 +1454,856 @@ function buildMeshes() {
     rim.rotation.x = Math.PI / 2;
     rim.position.set(x, 0.1, z);
     rim.castShadow = true;
-    world.add(disc, rim);
+    s.root.add(disc, rim);
   }
-
-  world.add(flatSign(compassCanvas(), 14, -116, -88));
-  world.add(flatSign(scaleCanvas(), 60, 32, -88));
+  s.root.add(flatSign(compassCanvas(), 14, -116, -88));
+  s.root.add(flatSign(scaleCanvas(50), 60, 32, -88));
 }
 
-/* ------------------------------------------------------------------
-   Πινακίδες και ετικέτες (canvas)
-   ------------------------------------------------------------------ */
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
-}
-function canvasTexture(c) {
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 4;
-  return t;
-}
-function flatSign(c, widthM, x, z) {
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(widthM, widthM * c.height / c.width),
-    new THREE.MeshBasicMaterial({ map: canvasTexture(c), transparent: true, depthWrite: false }));
-  m.rotation.x = -Math.PI / 2;
-  m.position.set(x, 0.08, z);
-  m.renderOrder = 2;
-  return m;
-}
-function compassCanvas() {
-  const c = document.createElement('canvas'); c.width = 256; c.height = 256;
-  const g = c.getContext('2d');
-  g.fillStyle = 'rgba(29,35,38,0.88)'; g.beginPath(); g.arc(128, 128, 120, 0, Math.PI * 2); g.fill();
-  g.fillStyle = '#F2F4F5'; g.beginPath(); g.moveTo(128, 34); g.lineTo(160, 150); g.lineTo(128, 128); g.lineTo(96, 150); g.closePath(); g.fill();
-  g.font = `700 64px ${UI_FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('Β', 128, 196);
-  return c;
-}
-function scaleCanvas() {
-  // 60 μ. πλάτος πινακίδας: η μπάρα των 50 μ. σχεδιάζεται σε ακριβή αναλογία
-  const c = document.createElement('canvas'); c.width = 1200; c.height = 220;
-  const g = c.getContext('2d'); const pxPerM = 1200 / 60; const x0 = 5 * pxPerM;
-  g.fillStyle = 'rgba(29,35,38,0.86)'; roundRect(g, 0, 0, 1200, 220, 18); g.fill();
-  g.fillStyle = '#F2F4F5';
-  g.fillRect(x0, 120, 25 * pxPerM, 26);
-  g.strokeStyle = '#F2F4F5'; g.lineWidth = 5; g.strokeRect(x0 + 25 * pxPerM, 120, 25 * pxPerM, 26);
-  g.font = `600 52px ${UI_FONT}`; g.textBaseline = 'alphabetic';
-  g.textAlign = 'center';
-  g.fillText('0', x0, 98); g.fillText('25', x0 + 25 * pxPerM, 98); g.fillText('50 μ.', x0 + 50 * pxPerM, 98);
-  return c;
-}
+SITES.knossos = {
+  id: 'knossos', short: 'Κνωσός', title: 'Κνωσός XR',
+  lead: 'Το ανάκτορο της Κνωσού ως μακέτα πάνω στο θρανίο ή σε φυσικό μέγεθος, για Meta Quest 3 και Magic Leap 2.',
+  aria: 'Τρισδιάστατο μοντέλο του ανακτόρου της Κνωσού',
+  poisHeading: 'Σημεία του ανακτόρου',
+  pois: K_POIS,
+  groups: ['Κέντρο', 'Δυτική πλευρά', 'Βόρεια πλευρά', 'Ανατολική πτέρυγα', 'Νότια πλευρά'],
+  teleport: ['court', 'westcourt', 'westporch', 'magazines', 'throne', 'north', 'theatral', 'grandstair', 'doubleaxes', 'southprop'],
+  first: 'court',
+  pivot: [-30, 0, -20], table: 1 / 250, tableMin: 1 / 600, tableMax: 1 / 50,
+  cam: { pos: [-100, 92, 104], target: [-14, 0, -16], min: 12, max: 520, back: 44, up: 36 },
+  shadow: { x: -20, z: -20, half: 140 },
+  lift: { today: 9.5, recon: 15.5 }, labelClamp: [0.5, 9], near: 95,
+  liftMap: { court: 1.7, grandstair: 0.6, doubleaxes: 1.25, north: 1.2, westporch: 0.8 },
+  major: new Set(['westcourt', 'westporch', 'magazines', 'throne', 'court', 'north', 'theatral', 'royalroad', 'grandstair', 'doubleaxes', 'southprop']),
+  toggle: 'evans', legend: ['stone', 'evans', 'plaster'],
+  foot: '<p>Σχηματικό μοντέλο. Οι θέσεις και οι διαστάσεις των χώρων είναι κατά προσέγγιση. Σταθερά σημεία αναφοράς: Κεντρική Αυλή περίπου 50 × 25 μ., έκταση ανακτόρου 20.000 m².</p>'
+    + '<p>Πηγές: Υπουργείο Πολιτισμού, <a href="https://www.ancientportsantiques.com/wp-content/uploads/Documents/PLACES/Crete-Cyprus/Knossos-Brochure2022.pdf" target="_blank" rel="noopener">ενημερωτικό φυλλάδιο «Knossos» (ΤΑΠ)</a>. Εφορεία Αρχαιοτήτων Ηρακλείου, <a href="https://www.searchculture.gr/aggregator/edm/knossos/000158-ce264eb8-2fd4-4097-a817-8af029a7fd86" target="_blank" rel="noopener">Νότιο Πρόπυλο</a>. <a href="https://crete.classics.ox.ac.uk/U3S1/U3S1L2.html" target="_blank" rel="noopener">University of Oxford, Ancient Crete</a>.</p>',
+  build: buildKnossos,
+};
 
-const labelsGroup = new THREE.Group();
-world.add(labelsGroup);
-const labels = new Map();
-let pointerLines = null;
-const labelGeom = new THREE.PlaneGeometry(1, 1);
+/* ==================================================================
+   ΜΥΚΗΝΕΣ, ΑΚΡΟΠΟΛΗ
+   Κάτοψη τειχών και κτιρίων από το OpenStreetMap, ανάγλυφο από το EU-DEM.
+   Συντεταγμένες σε μέτρα: x προς ανατολή, z προς νότο, αρχή στο κατώφλι
+   της Πύλης των Λεόντων, y = 0 στο ύψος του κατωφλιού.
+   ================================================================== */
+const MYK = {"grid":{"x0":-110,"z0":-110,"d":10,"nx":45,"nz":33,"e0":229.7,"data":"JP8l/yX/Jv8m/yb/Jv8o/yv/MP82/z3/Q/9K/1L/Wf9g/2j/cf97/4X/kf+d/6r/t//F/9H/3v/q//b/AwAQAB4ALQA9AEwAXABrAHkAhwCUAKIAsQDAAM4AM/81/zb/N/84/zn/Ov87/z//RP9J/1D/V/9e/2b/bf90/3z/hP+O/5r/pf+y/8D/zv/c/+r/9v8CAA4AGgAnADUAQwBRAGAAbwB9AIoAlgCiAK4AvQDMANoAQ/9F/0j/Sv9L/03/Tv9Q/1P/V/9d/2P/av9y/3r/gv+J/5H/mf+k/6//u//I/9f/5v/2/wQAEgAeACkANgBCAE8AWwBoAHYAhACQAJsApQCvALsAyQDYAOQAUv9V/1j/W/9e/2D/Yv9k/2b/av9w/3b/ff+G/47/l/+g/6j/sf+6/8X/0f/f/+//AAARACEAMAA9AEoAVgBhAGwAdwCCAI4AmQCjAKwAtQC+AMgA1QDiAO0AYP9k/2j/bP9v/3L/dP91/3j/fP+C/4n/kP+Z/6P/rf+4/8L/y//U/97/6f/4/wkAHAAuAD8ATwBeAGsAdgCBAIoAkwCcAKYArgC1AL0AxADMANUA4ADrAPUAbv9z/3f/fP+A/4P/hf+H/4r/jv+U/5v/ov+s/7f/xP/R/93/6P/y//z/CAAXACgAOgBMAFwAbAB6AIgAkgCcAKQArAC0ALwAwgDIAM0A0wDaAOIA6gDzAPwAev+A/4X/iv+P/5L/lf+X/5v/n/+l/6z/tf/A/83/3P/r//r/CAAVACIALwA9AEwAXABqAHkAhgCTAJ8AqQCxALkAwADHAM4A1ADZAN4A4gDnAO0A8wD7AAMBhf+L/5H/l/+c/5//ov+l/6n/r/+2/77/yP/V/+T/9P8GABkAKgA7AEsAWgBoAHUAgQCNAJcAogCtALcAvwDGAM0A0gDYAN4A5ADpAOwA8ADzAPgA/AACAQkBjv+V/5z/ov+n/6v/rv+y/7f/vv/G/9D/3P/q//v/DQAiADgATQBiAHQAhgCUAKAAqwC1AL4AxQDPANYA3QDhAOUA5wDqAO4A8wD3APkA+wD+AAIBBQEJAQ8Blf+d/6T/q/+w/7X/uP+8/8L/y//V/+H/8P8BABMAKAA/AFcAbgCFAJoArgC+AM0A2QDkAO0A9QD9AAIBBQEFAQQBAgEAAf8AAAEBAQMBBAEHAQoBDQEQARYBmv+i/6r/sf+3/7z/wP/E/8z/1v/j//L/AwAWACwAQwBcAHUAjgCmAL0A0wDmAPcABwEUASABKQEuATABLwErASUBHgEVAQ4BCwEKAQsBDAEOAREBFAEYAR0Bnf+m/67/tv+8/8L/xf/K/9L/3//u/wAAFAAqAEMAXQB3AJEAqwDEAN0A9AAJARwBLQE9AUkBUwFWAVUBTwFIAT4BNAElARkBEwERAREBEgEUARgBGwEgASQBnv+n/6//t/++/8T/x//M/9b/5f/2/wsAIgA6AFYAcgCPAKsAxwDhAPkAEAEkATYBRwFVAWEBaQFqAWYBXQFTAUcBOgEqAR0BFwEWARcBGAEbAR4BIQElASkBnf+l/67/tv+9/8L/xv/M/9f/6P/8/xMALABHAGQAgwCiAMEA3gD6ABIBJwE5AUgBVAFfAWgBbAFsAWYBWwFOAUABMwElARwBGAEZARsBHgEgASMBJgEpAS0Bmf+h/6r/sv+5/7//w//K/9b/6P/+/xcAMgBPAG4AjwCwANEA8AANASYBOgFIAVMBWwFhAWYBaAFlAV0BUAFBATMBJQEbARUBFgEaAR8BJAEmASgBKQEsAS8BlP+b/6P/q/+y/7n/vv/F/9P/5v/9/xgANABTAHMAlgC4ANsA/AAaATMBRwFVAV0BYQFjAWMBYQFbAVEBQwE0ASUBGQERAQ8BEwEbASMBKQEsASwBLQEuATEBjf+U/5v/ov+p/7D/tv+//87/4v/6/xYAMwBTAHQAlwC6AN4AAAEgATsBTwFdAWUBZwFmAWIBXAFTAUcBOAEpARsBEQELAQsBEQEbAScBMAEyATEBLwEwATIBhP+K/5H/mP+f/6b/rv+5/8j/3P/1/xIAMABPAHAAkwC3ANoA/gAfATsBUgFhAWkBawFoAWEBWAFOAUEBMgEiARYBDQEJAQsBEgEdASwBNwE4ATQBMQExATQBev9//4X/jP+T/5v/pP+x/8H/1f/v/wsAKQBIAGkAjACuANEA9QAWATMBSwFcAWUBaAFmAV8BVgFMAUABMQEiARYBDgELAQ4BFgEiATABOQE5ATUBMgExATUBb/90/3n/f/+H/4//mv+o/7n/zf/m/wIAHwA+AF8AgACiAMQA5QAFASIBOwFNAVkBXwFfAVwBVQFNAUIBNQEmARkBEQEQARUBHgEpATQBOQE5ATUBMwEzATcBZP9o/2z/cv96/4P/j/+d/67/w//b//b/EwAyAFEAcgCSALIA0ADtAAoBIwE2AUQBTQFRAVEBTwFKAUIBNgEoARsBEwEUARsBJQEvATYBOQE3ATQBMwE1ATsBWP9b/1//Zf9s/3b/gv+R/6P/t//P/+n/BQAiAEAAXwB9AJsAtgDRAOwABAEXASYBMQE5AT0BPgE8ATcBLgEjARcBEAEUAR4BJwEwATUBNgE1ATIBNAE4AT8BTP9P/1L/V/9e/2j/df+F/5f/q//B/9r/9f8QACwASABkAH8AmQCxAMkA3gDxAAABDAEVARwBIAEhAR8BGgETAQ0BCwEQARoBJAErAS8BMQEyATMBNgE8AUQBQf9D/0X/Sv9R/1r/Z/93/4n/nf+y/8n/4v/8/xYALwBIAGEAeACOAKIAtQDFANMA4ADqAPIA+QD8AP4A/gD9AP0AAAEHARIBHAEjASgBKwEvATQBOgFBAUsBNv83/zn/Pf9D/0z/Wf9p/3v/jv+i/7f/zv/m//3/EwAqAD8AVABnAHkAiQCXAKQAsAC7AMQAzADTANkA3gDiAOcA7wD6AAYBEQEaASEBJwEvATcBPwFJAVQBLP8s/y3/Mf82/z//TP9b/2z/ff+Q/6P/uP/N/+L/9v8JABwALQA+AE4AXABpAHUAgACKAJUAnwCoALEAuwDEAM4A2gDoAPcABAERARwBJgExATwBRwFSAV8BIv8h/yL/Jf8q/zP/Pv9N/1z/bP98/47/of+z/8b/1//n//f/BQAUACIALwA7AEYAUABaAGYAcQB9AIoAlwClALQAxADVAOcA+AAJARgBJwE2AUMBUQFfAW0BGf8Y/xj/Gf8e/yb/Mf8+/0v/Wf9o/3f/iP+Y/6j/t//E/9H/3P/o//X/AQAMABcAIQArADgARQBUAGQAdgCIAJsArwDEANoA8AAFARkBLAE+AU8BXwFuAX0BEf8P/w7/D/8S/xn/I/8u/zn/RP9R/1//bf97/4n/lf+g/6r/tP++/8j/0//d/+j/8//+/wwAHAAuAEIAWABvAIYAngC4ANIA7AAGAR8BNgFLAV8BcgGCAZEBCv8G/wX/Bf8H/wz/FP8e/yb/L/86/0b/Uv9e/2n/c/98/4T/jP+V/53/pv+x/7z/yP/V/+X/+P8NACQAPgBaAHUAkgCxAM8A7QAKAScBQgFbAXIBiAGZAaYBA////vz++/78/v/+BP8L/xL/Gf8j/y7/OP9B/0r/Uv9Z/2H/aP9v/3b/fv+J/5X/ov+x/8P/2P/x/wsAKQBIAGcAiACrAM0A7gAOAS0BTAFnAYIBmwGsAbcB/f74/vX+8v7x/vL+9f76/v/+Bv8O/xf/H/8n/y7/NP87/0H/SP9O/1X/Xv9o/3X/g/+U/6j/wP/a//f/FwA5AFsAfwCkAMkA7AAPATABUQFvAYsBowG1AcIB+P7z/u7+6v7o/uj+6f7r/u/+9P77/gH/CP8P/xX/Gv8g/yb/LP8z/zr/Q/9O/1z/a/9+/5P/rP/I/+f/CAAsAFAAdgCcAMIA6AAMAS8BUQFwAYwBpQG4AcYB"},"rings":{"west":[-3.3,2.0,-12.2,-9.1,-17.6,-5.6,-10.7,4.6,-15.6,9.0,-18.9,13.5,-23.4,22.1,-26.3,29.3,-27.2,41.0,-28.7,50.8,-26.3,55.3,-22.9,59.7,-3.7,86.9,-2.0,92.2,10.3,108.2,15.1,109.1,19.8,112.3,26.3,114.6,31.6,117.3,54.6,134.1,59.8,138.8,68.7,143.6,71.4,143.5,75.6,144.0,78.7,147.6,83.0,151.0,90.7,156.2,99.2,161.1,101.8,162.2,106.2,162.8,109.7,162.2,113.5,159.4,113.7,157.4,117.9,154.1,120.2,152.6,119.6,152.0,117.1,153.2,114.0,153.3,112.3,156.0,109.1,156.0,106.7,157.6,102.0,157.3,94.3,152.5,86.8,147.6,81.4,142.2,78.0,139.4,72.6,139.2,63.2,134.8,58.4,130.5,34.8,112.1,29.1,108.8,24.3,105.9,19.9,104.4,17.9,103.7,2.7,84.8,1.1,82.0,-16.5,53.7,-20.3,47.5,-21.2,43.3,-22.1,38.5,-21.4,32.7,-19.0,28.6,-18.3,24.1,-16.6,19.5,-13.3,13.2,-8.4,7.5,-6.2,4.9],"north":[4.3,-2.6,8.2,-4.9,-1.4,-19.4,-4.9,-28.4,-10.0,-38.4,-3.2,-38.9,5.1,-39.5,7.2,-34.1,11.0,-35.8,13.6,-34.0,17.5,-33.7,23.2,-37.8,32.6,-38.5,35.6,-38.0,39.4,-34.0,39.5,-29.7,47.6,-27.8,68.6,-21.6,75.0,-16.7,89.0,-8.8,101.4,-5.8,113.9,-3.6,133.8,-1.5,148.7,4.3,153.0,3.2,170.9,2.4,181.5,1.9,187.0,-0.1,186.3,-2.6,181.1,-1.4,172.6,-1.4,161.0,-1.0,154.8,-0.1,154.2,-3.4,135.0,-5.0,118.3,-8.3,98.4,-12.0,88.1,-16.5,70.7,-28.2,56.0,-31.3,48.5,-33.8,44.1,-35.2,41.5,-40.7,35.9,-43.2,30.3,-44.5,18.7,-44.1,17.8,-40.6,15.9,-39.6,13.6,-39.8,12.1,-41.3,10.9,-43.7,9.4,-46.9,-15.8,-42.8,-16.5,-39.5,-5.9,-17.9,-1.7,-11.1],"ne":[252.1,25.8,246.6,22.2,252.0,17.1,256.7,14.4,262.5,14.7,268.1,17.4,272.5,22.0,283.5,13.9,281.6,11.1,275.3,7.0,272.4,4.6,268.9,1.3,266.3,-3.3,265.6,-6.2,263.9,-9.1,259.1,-8.4,253.4,-6.2,244.3,0.4,237.5,-0.2,226.9,1.9,209.4,6.5,206.2,9.4,195.9,10.4,190.4,10.7,181.3,8.2,181.5,4.9,188.2,3.3,197.9,5.4,207.3,3.7,220.9,-2.0,235.7,-3.3,251.7,-12.9,256.6,-13.2,262.2,-15.8,269.4,-13.7,272.1,-8.4,276.9,-1.7,281.7,4.2,287.3,10.3,289.2,13.6,289.4,16.4,287.4,20.0,276.6,27.4,273.9,28.6,270.8,28.7,267.0,24.1,262.2,20.2,259.2,19.5,256.3,20.3,254.3,22.3],"south":[120.2,152.6,127.9,147.0,128.1,140.3,129.3,132.2,138.3,128.2,150.2,129.5,189.4,122.1,201.6,126.9,226.1,110.7,238.1,69.6,237.3,44.4,252.0,30.0,252.1,25.8,246.6,27.6,231.7,42.2,232.6,68.9,221.4,107.2,201.0,120.7,189.9,116.4,150.0,123.9,137.4,122.6,124.3,128.4,122.6,139.8,122.5,144.1]},"outline":[-3.3,2.0,-12.2,-9.1,-17.6,-5.6,-10.7,4.6,-15.6,9.0,-18.9,13.5,-23.4,22.1,-26.3,29.3,-27.2,41.0,-28.7,50.8,-26.3,55.3,-22.9,59.7,-3.7,86.9,-2.0,92.2,10.3,108.2,15.1,109.1,19.8,112.3,26.3,114.6,31.6,117.3,54.6,134.1,59.8,138.8,68.7,143.6,71.4,143.5,75.6,144.0,78.7,147.6,83.0,151.0,90.7,156.2,99.2,161.1,101.8,162.2,106.2,162.8,109.7,162.2,113.5,159.4,113.7,157.4,117.9,154.1,120.2,152.6,127.9,147.0,128.1,140.3,129.3,132.2,138.3,128.2,150.2,129.5,189.4,122.1,201.6,126.9,226.1,110.7,238.1,69.6,237.3,44.4,252.0,30.0,252.1,25.8,254.3,22.3,256.3,20.3,259.2,19.5,262.2,20.2,267.0,24.1,270.8,28.7,273.9,28.6,276.6,27.4,287.4,20.0,289.4,16.4,289.2,13.6,287.3,10.3,281.7,4.2,276.9,-1.7,272.1,-8.4,269.4,-13.7,262.2,-15.8,256.6,-13.2,251.7,-12.9,235.7,-3.3,220.9,-2.0,207.3,3.7,197.9,5.4,188.2,3.3,186.3,-2.6,181.1,-1.4,172.6,-1.4,161.0,-1.0,154.8,-0.1,154.2,-3.4,135.0,-5.0,118.3,-8.3,98.4,-12.0,88.1,-16.5,70.7,-28.2,56.0,-31.3,48.5,-33.8,44.1,-35.2,41.5,-40.7,35.9,-43.2,30.3,-44.5,18.7,-44.1,17.8,-40.6,15.9,-39.6,13.6,-39.8,12.1,-41.3,10.9,-43.7,9.4,-46.9,-15.8,-42.8,-16.5,-39.5,-5.9,-17.9,-1.7,-11.1,4.3,-2.6],"bldg":{"granary":[-16.6,19.5,-10.5,24.6,-7.2,20.3,-6.2,21.1,-4.7,19.1,-3.5,19.9,-1.4,17.3,1.0,19.5,2.2,18.3,3.6,19.7,5.7,18.0,1.2,12.1,-6.2,4.9,-8.4,7.5,-13.3,13.2,-16.6,19.5],"gca":[-7.4,22.8,-11.9,25.5,-15.2,29.6,-17.1,34.5,-17.2,39.8,-15.5,44.7,-12.2,49.0,-8.0,51.8,-3.4,53.0,1.9,52.7,6.4,50.9,10.2,47.8,12.9,43.6,14.1,38.7,9.3,25.8,3.0,22.4,-2.2,21.7,-7.4,22.8],"warrior":[6.4,54.1,17.5,46.8,20.6,51.9,28.0,64.0,11.3,77.6,3.6,81.5,1.1,77.6,-4.1,69.8,-10.0,59.2,-5.5,58.0,6.4,54.1],"ramphouse":[8.2,84.3,31.5,68.0,41.2,81.7,18.0,98.1,8.2,84.3],"cult":[54.2,122.7,50.5,119.0,43.5,113.8,35.2,108.9,26.6,104.6,22.0,100.8,31.4,95.6,46.4,83.9,52.4,87.4,60.4,94.3,71.7,105.2,89.3,122.2,93.8,125.9,101.9,132.5,104.4,137.1,106.6,141.3,115.3,141.5,121.5,146.0,120.4,149.9,114.5,151.3,107.6,154.4,103.8,153.2,93.3,147.1,86.4,140.2,82.0,136.5,75.6,134.8,68.0,131.7,62.3,128.9,54.2,122.7],"northq":[-10.0,-38.4,-3.2,-38.9,5.1,-39.5,7.2,-34.1,11.0,-35.8,13.6,-34.0,17.5,-33.7,23.2,-37.8,32.6,-38.5,35.6,-38.0,39.4,-34.0,39.5,-29.7,47.6,-27.8,68.6,-21.6,75.0,-16.7,64.0,-7.0,57.9,-5.4,57.8,-0.6,56.4,-0.6,49.3,-0.6,49.3,1.1,39.1,0.9,39.0,-4.0,24.7,-2.6,11.1,2.0,9.7,-1.0,8.2,-4.9,-1.4,-19.4,-4.9,-28.4,-10.0,-38.4],"columns":[195.9,38.8,206.1,36.2,216.9,39.6,202.2,67.3,186.4,61.6,195.9,38.8],"artisans":[195.9,38.8,190.0,38.9,182.3,43.9,177.0,57.8,186.4,61.6,195.9,38.8],"houses":[227.6,31.2,234.5,35.9,231.6,43.7,228.0,51.3,224.1,60.5,219.5,70.8,211.3,78.1,199.3,73.8,202.2,67.3,216.9,39.6,221.9,31.8,227.6,31.2],"gamma":[210.8,8.4,214.4,7.6,216.4,7.1,219.6,6.2,222.7,5.5,235.5,2.3,237.8,11.4,221.1,15.6,215.0,17.1,213.1,17.5,210.8,8.4],"delta":[234.7,35.6,227.9,31.1,231.1,26.3,234.3,21.4,236.3,18.6,237.4,16.8,245.0,21.9,245.6,22.2,242.5,26.8,239.2,31.7,236.0,36.5,234.7,35.6],"throne":[97.6,47.0,94.1,57.4,101.1,59.9,102.6,55.4,104.7,49.4,97.6,47.0],"corridor":[97.6,47.0,98.5,44.6,99.3,42.4,121.2,49.2,120.1,54.5,104.7,49.4,97.6,47.0],"southramp":[57.9,82.0,76.5,97.5,96.9,106.0,112.9,108.8,123.1,92.5,95.6,86.0,67.2,70.8,57.9,82.0],"temple":[102.8,12.2,108.0,46.7,126.9,45.5,121.0,11.2,102.8,12.2],"summit":[126.3,29.4,130.6,24.6,132.4,25.0,135.9,26.7,139.4,22.4,146.5,19.9,151.2,20.6,153.8,22.5,153.2,27.4,157.3,31.0,168.7,32.2,169.8,37.8,165.9,45.7,161.5,49.3,148.9,50.1,142.0,48.6,127.5,41.4,126.3,29.4]},"lines":[[32.6,-38.5,33.7,-28.2,35.1,-15.8,36.0,-7.3],[23.2,-37.8,24.2,-30.1],[9.7,-1.0,15.6,-3.1,8.3,-19.7],[18.7,-24.1,24.6,-26.5],[14.7,-19.3,20.5,-6.2],[26.3,-13.0,21.8,-11.3,17.2,-21.3],[24.6,-26.5,26.3,-13.0,26.8,-8.2,23.6,-7.3,22.9,-8.9],[11.0,-35.8,15.9,-22.9,8.3,-19.7,3.1,-17.6,8.2,-4.9,9.7,-1.0],[-1.4,-19.4,5.2,-22.6,11.6,-25.7,7.2,-34.1,0.9,-31.1,-4.9,-28.4],[-3.2,-38.9,0.9,-31.1,5.2,-22.6],[-7.3,29.6,-7.3,37.9,-1.2,38.0],[9.3,25.8,14.1,38.7,12.9,43.6,10.2,47.8,6.4,50.9,1.9,52.7,-3.4,53.0,-8.0,51.8,-12.2,49.0,-15.5,44.7,-17.2,39.8,-17.1,34.5,-15.2,29.6,-11.9,25.5,-7.4,22.8],[5.7,18.0,1.2,12.1,-6.2,4.9],[-3.3,2.0,-0.1,5.8],[2.2,18.3,-1.6,13.9,-8.4,7.5],[-16.6,19.5,-10.5,24.6,-7.2,20.3,-6.2,21.1,-4.7,19.1,-3.5,19.9,-1.4,17.3,1.0,19.5,2.2,18.3,3.6,19.7],[11.3,77.6,3.6,81.5],[-2.0,61.1,-4.3,61.7,-5.5,58.0,-8.5,58.8],[1.6,74.7,3.2,73.7,8.2,70.4],[0.3,69.3,3.2,73.7],[9.4,72.3,8.2,70.4,5.3,66.1,0.3,69.3,-0.5,69.9],[1.1,77.6,9.4,72.3,10.6,71.4],[-4.1,69.8,2.8,65.3],[-8.5,58.8,-7.8,60.6,-9.0,61.0,-4.1,69.8,1.1,77.6,3.6,81.5],[234.3,21.4,237.4,23.4,241.2,26.0,242.5,26.8],[231.1,26.3,234.1,28.3,237.9,30.9,239.2,31.7],[245.0,21.9,240.5,18.9,239.3,20.6,237.4,23.4,234.1,28.3,230.9,33.1],[241.2,26.0,237.9,30.9,234.7,35.6,230.9,33.1,227.9,31.1,231.1,26.3,234.3,21.4,236.3,18.6,239.3,20.6],[98.5,44.6,105.7,46.9],[97.6,47.0,104.7,49.4,102.6,55.4,92.1,51.9],[124.4,59.8,123.4,64.7],[118.2,63.7,119.3,58.5],[120.1,54.5,121.2,49.2,126.4,50.3,125.2,56.1],[14.1,38.7,17.5,46.8,20.6,51.9,28.0,64.0],[229.3,3.8,230.1,6.8],[215.0,17.1,214.0,12.9,215.6,12.5,217.6,12.0],[220.0,11.4,221.1,15.6],[219.6,6.2,220.9,11.2],[216.4,7.1,217.6,12.0,220.0,11.4,220.9,11.2,224.0,10.4,222.7,5.5],[215.6,12.5,214.4,7.6],[230.9,3.4,232.2,8.5],[225.9,4.7,227.6,11.5],[213.1,17.5,210.8,8.4,214.4,7.6,216.4,7.1,219.6,6.2,222.7,5.5,225.9,4.7,229.3,3.8,230.9,3.4,235.5,2.3],[56.4,-0.6,56.4,-4.7,56.4,-8.6],[49.3,-8.6,52.1,-10.5],[56.2,-13.7,53.5,-11.6],[47.3,-13.2,48.9,-10.8,46.5,-8.9],[48.5,-14.1,49.3,-13.0,50.7,-11.0],[50.6,-14.1,49.3,-13.0],[48.5,-19.4,50.3,-21.0],[51.9,-15.3,53.9,-17.0,50.3,-21.0,47.7,-22.9,44.3,-19.8,46.1,-17.4,47.7,-15.2],[49.3,-4.7,56.4,-4.7],[56.4,-8.6,49.3,-8.6,49.3,-4.7,49.3,-0.6,56.4,-0.6],[54.5,-16.0,56.2,-13.7,57.9,-9.6,64.3,-12.5,67.3,-15.2],[62.6,-20.0,68.1,-18.9],[57.6,-23.3,56.8,-17.6,62.2,-16.6,62.6,-20.0,62.9,-22.0],[39.6,-27.8,57.6,-23.3,62.9,-22.0],[38.3,-8.4,37.7,-13.5,41.1,-13.8],[35.1,-15.8,45.0,-16.4,46.1,-17.4,46.6,-17.9],[33.7,-28.2,39.5,-28.6,39.6,-27.8,39.9,-23.9,36.1,-23.7],[181.5,1.9,181.5,3.3,181.5,4.9]],"retain":[[-1.2,38.0,4.4,41.9,4.9,45.6,1.7,49.7,-3.0,49.9,-6.4,49.5,-9.5,47.5,-12.4,43.8,-13.6,40.0,-13.8,34.1,-13.1,30.8,-10.6,27.5,-7.4,25.2,-7.3,29.6,-1.4,29.6,-1.2,38.0],[2.0,-1.2,6.5,7.0,10.0,15.0,13.3,13.3],[205.1,15.5,190.2,13.4,176.2,8.5,171.2,5.6,148.9,6.5,135.1,5.6],[112.5,71.9,127.4,71.0],[118.2,63.7,123.4,64.7,137.0,67.5,139.4,55.7],[88.9,0.8,81.5,5.6,77.1,11.0,69.0,25.8],[20.6,51.9,25.5,48.4,33.6,58.6],[80.6,16.4,80.5,24.9,82.4,24.9,82.4,29.9,85.6,29.9,85.5,36.6,83.8,36.6,83.7,45.0,89.8,45.1,92.1,51.9,93.4,55.6,91.5,60.0,100.2,62.4,117.6,67.7],[181.5,4.9,175.1,5.4]]};
 
-function drawLabel(poi, selected) {
-  const fs = 44, padX = 24, padY = 15;
-  const c = poi._canvas || (poi._canvas = document.createElement('canvas'));
-  const g = c.getContext('2d');
-  g.font = `600 ${fs}px ${UI_FONT}`;
-  const w = Math.ceil(g.measureText(poi.name).width) + padX * 2, h = fs + padY * 2;
-  c.width = w; c.height = h;
-  g.font = `600 ${fs}px ${UI_FONT}`;
-  g.fillStyle = selected ? '#A9362B' : 'rgba(27,33,36,0.88)';
-  roundRect(g, 0, 0, w, h, 8); g.fill();
-  if (selected) { g.strokeStyle = '#F6E7E4'; g.lineWidth = 3; roundRect(g, 1.5, 1.5, w - 3, h - 3, 7); g.stroke(); }
-  g.fillStyle = '#F4F6F7'; g.textBaseline = 'middle';
-  g.fillText(poi.name, padX, h / 2 + 2);
-  return c;
-}
-function buildLabels() {
-  for (const poi of POIS) {
-    const c = drawLabel(poi, false);
-    const mesh = new THREE.Mesh(labelGeom, new THREE.MeshBasicMaterial({ map: canvasTexture(c), transparent: true, depthTest: false, depthWrite: false }));
-    mesh.renderOrder = 10;
-    mesh.userData.poi = poi.id;
-    labelsGroup.add(mesh);
-    labels.set(poi.id, mesh);
-  }
-  pointerLines = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x1D2326, transparent: true, opacity: 0.55 }));
-  pointerLines.geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(POIS.length * 6), 3));
-  pointerLines.frustumCulled = false;
-  labelsGroup.add(pointerLines);
-}
-function refreshLabelTexture(id) {
-  const poi = POI[id], mesh = labels.get(id);
-  if (!poi || !mesh) return;
-  drawLabel(poi, state.selected === id);
-  mesh.material.map.dispose();
-  mesh.material.map = canvasTexture(poi._canvas);
-  mesh.material.needsUpdate = true;
-}
-
-// Οι κύριες ετικέτες φαίνονται πάντα, οι υπόλοιπες όταν πλησιάζει κανείς ή όταν επιλεγούν.
-const LIFT = { court: 1.7, grandstair: 0.6, doubleaxes: 1.25, north: 1.2, westporch: 0.8 };
-const MAJOR = new Set(['westcourt', 'westporch', 'magazines', 'throne', 'court', 'north', 'theatral', 'royalroad', 'grandstair', 'doubleaxes', 'southprop']);
-const camPos = new THREE.Vector3(), labelPos = new THREE.Vector3();
-const billboardQuat = new THREE.Quaternion(), parentQuat = new THREE.Quaternion();
-function updateLabels() {
-  if (!state.labels) return;
-  const presenting = renderer.xr.isPresenting;
-  const cam = presenting ? renderer.xr.getCamera() : camera;
-  cam.matrixWorld.decompose(camPos, billboardQuat, _s);
-  labelsGroup.getWorldQuaternion(parentQuat).invert();
-  const q = parentQuat.multiply(billboardQuat);
-  const sc = world.scale.x;
-  const walk = presenting && xr.mode === 'walk';
-  const table = presenting && xr.mode === 'table';
-  const baseLift = walk ? 2.6 : (state.view === 'recon' ? 15.5 : 9.5);
-  const pos = pointerLines.geometry.attributes.position;
-  POIS.forEach((poi, i) => {
-    const mesh = labels.get(poi.id), c = poi._canvas;
-    const [x, y, z] = poi.p;
-    const sel = state.selected === poi.id, major = MAJOR.has(poi.id);
-    const lift = walk ? baseLift : baseLift * (LIFT[poi.id] ?? (major ? 1 : 0.62));
-    labelPos.set(x, y + lift, z);
-    labelsGroup.localToWorld(labelPos);
-    const d = labelPos.distanceTo(camPos);
-    let visible = sel || major || (walk ? d < 45 : table ? d < 0.5 : d < 95);
-    if (walk && !sel && d > 220) visible = false;
-    mesh.visible = visible;
-    if (!visible) {
-      pos.setXYZ(i * 2, x, y, z);
-      pos.setXYZ(i * 2 + 1, x, y, z);
-      return;
-    }
-    // Ύψος ετικέτας ανάλογο της απόστασης: σταθερό φαινόμενο μέγεθος σε οθόνη και γυαλιά
-    let hp = d * 0.03 * (sel ? 1.15 : 1);
-    hp = presenting ? THREE.MathUtils.clamp(hp, walk ? 0.12 : 0.008, walk ? 1.4 : 0.06) : THREE.MathUtils.clamp(hp, 0.5, 9);
-    const hl = hp / sc;
-    mesh.scale.set(hl * c.width / c.height, hl, 1);
-    mesh.position.set(x, y + lift + hl / 2, z);
-    mesh.quaternion.copy(q);
-    pos.setXYZ(i * 2, x, y + 0.1, z);
-    pos.setXYZ(i * 2 + 1, x, y + lift, z);
-  });
-  pos.needsUpdate = true;
-}
-const visibleLabels = () => [...labels.values()].filter((m) => m.visible);
-
-/* ------------------------------------------------------------------
-   Κατάσταση και επιλογές προβολής
-   ------------------------------------------------------------------ */
-const state = { view: 'today', evans: true, labels: true, selected: 'court' };
-const xr = { session: null, kind: null, mode: 'table', refType: 'local-floor', needsPlacement: 0, table: { scale: 1 / 250, rot: 0, dy: 0 } };
-
-function applyEvansColors() {
-  const on = state.evans;
-  M.evansToday.color.setHex(on ? HEX.evans : HEX.stone);
-  M.evansRecon.color.setHex(on ? HEX.evans : HEX.plaster);
-  M.shaftToday.color.setHex(on ? HEX.evans : HEX.red);
-  M.capToday.color.setHex(on ? 0x56708A : HEX.dark);
-}
-function setView(v) {
-  state.view = v;
-  today.visible = v === 'today';
-  recon.visible = v === 'recon';
-  document.getElementById('vToday').setAttribute('aria-checked', String(v === 'today'));
-  document.getElementById('vRecon').setAttribute('aria-checked', String(v === 'recon'));
-  document.getElementById('stageTag').textContent = v === 'today' ? 'Σήμερα' : 'Αναπαράσταση';
-  drawMenu();
-}
-function setEvans(on) {
-  state.evans = on;
-  document.getElementById('chkEvans').checked = on;
-  applyEvansColors();
-  drawMenu();
-}
-function setLabels(on) {
-  state.labels = on;
-  document.getElementById('chkLabels').checked = on;
-  labelsGroup.visible = on;
-  drawMenu();
-}
-function selectPoi(id, fly = false) {
-  const prev = state.selected;
-  state.selected = id;
-  if (prev && prev !== id) refreshLabelTexture(prev);
-  refreshLabelTexture(id);
-  const poi = POI[id];
-  document.getElementById('infoGroup').textContent = poi.group;
-  document.getElementById('infoName').textContent = poi.name;
-  document.getElementById('infoText').textContent = poi.text;
-  document.querySelectorAll('.poi').forEach((b) => b.setAttribute('aria-current', String(b.dataset.poi === id)));
-  if (fly && !xr.session) flyTo(poi);
-  drawMenu();
-}
-
-/* ------------------------------------------------------------------
-   Επιφάνεια εργασίας: πτήση της κάμερας προς ένα σημείο
-   ------------------------------------------------------------------ */
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let flight = null;
-function flyTo(poi) {
-  const target = new THREE.Vector3(...poi.p);
-  const dir = camera.position.clone().sub(controls.target).setY(0);
-  if (dir.lengthSq() < 1e-6) dir.set(-1, 0, 1);
-  dir.normalize();
-  const camEnd = target.clone().addScaledVector(dir, 44);
-  camEnd.y = target.y + 36;
-  if (reduceMotion) { controls.target.copy(target); camera.position.copy(camEnd); return; }
-  flight = { t0: performance.now(), dur: 750, fromT: controls.target.clone(), toT: target, fromC: camera.position.clone(), toC: camEnd };
-}
-function stepFlight(now) {
-  if (!flight) return;
-  const k = Math.min((now - flight.t0) / flight.dur, 1);
-  const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-  controls.target.lerpVectors(flight.fromT, flight.toT, e);
-  camera.position.lerpVectors(flight.fromC, flight.toC, e);
-  if (k >= 1) flight = null;
-}
-
-/* ------------------------------------------------------------------
-   XR: συνεδρία, τοποθέτηση μακέτας, περιήγηση 1:1, μενού στον χώρο
-   ------------------------------------------------------------------ */
-const handFactory = new XRHandModelFactory();
-const controllers = [];
-const raycaster = new THREE.Raycaster();
-const tmpMat = new THREE.Matrix4();
-const head = { pos: new THREE.Vector3(), quat: new THREE.Quaternion(), yaw: 0 };
-
-for (let i = 0; i < 2; i++) {
-  const ctrl = renderer.xr.getController(i);
-  const ray = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)]),
-    new THREE.LineBasicMaterial({ color: 0xF2F4F5, transparent: true, opacity: 0.75 }));
-  ray.scale.z = 2;
-  ray.visible = false;
-  ctrl.add(ray);
-  const cursor = new THREE.Mesh(new THREE.RingGeometry(0.006, 0.011, 24), new THREE.MeshBasicMaterial({ color: 0xF2F4F5, depthTest: false, transparent: true }));
-  cursor.renderOrder = 30;
-  cursor.visible = false;
-  scene.add(cursor);
-  const entry = { ctrl, ray, cursor, source: null, hover: null };
-  ctrl.addEventListener('connected', (e) => { entry.source = e.data; ray.visible = e.data.targetRayMode === 'tracked-pointer'; });
-  ctrl.addEventListener('disconnected', () => { entry.source = null; ray.visible = false; cursor.visible = false; });
-  ctrl.addEventListener('selectstart', () => onSelect(entry));
-  ctrl.addEventListener('squeezestart', () => placeMenu());
-  scene.add(ctrl);
-  const hand = renderer.xr.getHand(i);
-  hand.add(handFactory.createHandModel(hand, 'spheres'));
-  scene.add(hand);
-  entry.hand = hand;
-  controllers.push(entry);
-}
-
-function readHead() {
-  const cam = renderer.xr.getCamera();
-  cam.matrixWorld.decompose(head.pos, head.quat, _s);
-  const f = new THREE.Vector3(0, 0, -1).applyQuaternion(head.quat);
-  head.yaw = Math.atan2(f.x, -f.z);
-}
-const forwardOf = (yaw) => new THREE.Vector3(Math.sin(yaw), 0, -Math.cos(yaw));
-const floorY = () => (xr.refType === 'local-floor' ? 0 : head.pos.y - 1.6);
-
-function placeWorld(scale, phi, pivot, target) {
-  world.scale.setScalar(scale);
-  world.rotation.set(0, phi, 0);
-  const rotated = pivot.clone().multiplyScalar(scale).applyAxisAngle(new THREE.Vector3(0, 1, 0), phi);
-  world.position.copy(target).sub(rotated);
-}
-function placeTable() {
-  readHead();
-  const t = xr.table;
-  const yTable = (xr.refType === 'local-floor' ? 0.82 : head.pos.y - 0.62) + t.dy;
-  const target = head.pos.clone().addScaledVector(forwardOf(head.yaw), 0.9);
-  target.y = yTable;
-  placeWorld(t.scale, -head.yaw + t.rot, MODEL_PIVOT, target);
-}
-function teleport(poi) {
-  readHead();
-  const stand = new THREE.Vector3(...(poi.stand || poi.p));
-  const phi = THREE.MathUtils.degToRad(poi.yaw) - head.yaw;
-  placeWorld(1, phi, stand, new THREE.Vector3(head.pos.x, floorY(), head.pos.z));
-}
-
-// Μενού: ένας καμβάς 1024×1200 σε επίπεδο 0,36 × 0,42 μ.
-const MENU_W = 1024, MENU_H = 1200, MENU_M = 0.36;
-const menuCanvas = document.createElement('canvas');
-menuCanvas.width = MENU_W; menuCanvas.height = MENU_H;
-const menuTex = canvasTexture(menuCanvas);
-const menu = new THREE.Mesh(new THREE.PlaneGeometry(MENU_M, MENU_M * MENU_H / MENU_W), new THREE.MeshBasicMaterial({ map: menuTex, transparent: true, depthTest: false }));
-menu.renderOrder = 20;
-menu.visible = false;
-scene.add(menu);
-let menuButtons = [];
-
-function wrap(g, text, maxW) {
-  const words = text.split(' '); const lines = []; let line = '';
-  for (const w of words) {
-    const test = line ? `${line} ${w}` : w;
-    if (g.measureText(test).width > maxW && line) { lines.push(line); line = w; } else line = test;
-  }
-  if (line) lines.push(line);
-  return lines;
-}
-function drawMenu() {
-  if (!xr.session) return;
-  const g = menuCanvas.getContext('2d');
-  const hovered = new Set(controllers.map((c) => c.hover).filter(Boolean));
-  menuButtons = [];
-  g.clearRect(0, 0, MENU_W, MENU_H);
-  g.fillStyle = 'rgba(24,30,33,0.92)'; roundRect(g, 0, 0, MENU_W, MENU_H, 22); g.fill();
-  g.fillStyle = '#F2F4F5'; g.textBaseline = 'alphabetic';
-  g.font = `700 54px ${DISPLAY_FONT}`; g.fillText('Κνωσός XR', 40, 78);
-  g.font = `400 26px ${UI_FONT}`; g.fillStyle = '#AEBAC0'; g.textAlign = 'right';
-  g.fillText(xr.mode === 'table' ? `Μακέτα, κλίμακα 1:${Math.round(1 / xr.table.scale)}` : 'Φυσικό μέγεθος, 1:1', MENU_W - 40, 74);
-  g.textAlign = 'left';
-
-  const section = (y, text) => { g.font = `600 24px ${UI_FONT}`; g.fillStyle = '#9FB0B9'; g.fillText(text, 40, y); };
-  const button = (id, text, x, y, w, h, { active = false, disabled = false } = {}) => {
-    const hov = hovered.has(id) && !disabled;
-    g.fillStyle = active ? '#3E78B0' : hov ? '#4A5B66' : '#33414A';
-    if (disabled) g.fillStyle = '#262F35';
-    roundRect(g, x, y, w, h, 8); g.fill();
-    if (hov) { g.strokeStyle = '#F2F4F5'; g.lineWidth = 3; roundRect(g, x + 1.5, y + 1.5, w - 3, h - 3, 7); g.stroke(); }
-    g.font = `500 27px ${UI_FONT}`; g.fillStyle = disabled ? '#6E7B82' : '#F4F6F7'; g.textBaseline = 'middle';
-    const lines = wrap(g, text, w - 24);
-    lines.slice(0, 2).forEach((ln, i) => g.fillText(ln, x + 14, y + h / 2 + (i - (Math.min(lines.length, 2) - 1) / 2) * 30));
-    g.textBaseline = 'alphabetic';
-    if (!disabled) menuButtons.push({ id, x, y, w, h });
+// Ψηφιακό μοντέλο εδάφους: πλέγμα 10 μ. με ομαλή παρεμβολή Catmull-Rom
+function makeDem(g) {
+  const u8 = Uint8Array.from(atob(g.data), (ch) => ch.charCodeAt(0));
+  const q = new Int16Array(u8.buffer);
+  const at = (i, j) => q[Math.min(Math.max(j, 0), g.nz - 1) * g.nx + Math.min(Math.max(i, 0), g.nx - 1)] / 10;
+  const cr = (p0, p1, p2, p3, t) => p1 + 0.5 * t * (p2 - p0 + t * (2 * p0 - 5 * p1 + 4 * p2 - p3 + t * (3 * (p1 - p2) + p3 - p0)));
+  return (x, z) => {
+    const fx = (x - g.x0) / g.d, fz = (z - g.z0) / g.d;
+    const i = Math.floor(fx), j = Math.floor(fz), tx = fx - i, tz = fz - j;
+    const r = [];
+    for (let k = -1; k <= 2; k++) r.push(cr(at(i - 1, j + k), at(i, j + k), at(i + 1, j + k), at(i + 2, j + k), tx));
+    return cr(r[0], r[1], r[2], r[3], tz);
   };
-  const L = 40, W = MENU_W - 80, gap = 12;
-  const half = (W - gap) / 2, third = (W - 2 * gap) / 3, quarter = (W - 3 * gap) / 4;
+}
 
-  section(132, 'Λειτουργία');
-  button('mode:table', 'Μακέτα', L, 146, half, 58, { active: xr.mode === 'table' });
-  button('mode:walk', 'Περιήγηση 1:1', L + half + gap, 146, half, 58, { active: xr.mode === 'walk' });
-
-  section(246, 'Προβολή');
-  button('view:today', 'Σήμερα', L, 260, half, 58, { active: state.view === 'today' });
-  button('view:recon', 'Αναπαράσταση', L + half + gap, 260, half, 58, { active: state.view === 'recon' });
-  button('tog:evans', 'Επεμβάσεις Evans', L, 330, half, 58, { active: state.evans });
-  button('tog:labels', 'Ετικέτες', L + half + gap, 330, half, 58, { active: state.labels });
-
-  section(430, 'Μακέτα');
-  const off = xr.mode !== 'table';
-  button('tbl:rotl', 'Στροφή αριστερά', L, 444, third, 58, { disabled: off });
-  button('tbl:rotr', 'Στροφή δεξιά', L + third + gap, 444, third, 58, { disabled: off });
-  button('tbl:here', 'Μπροστά μου', L + 2 * (third + gap), 444, third, 58, { disabled: off });
-  button('tbl:smaller', 'Μικρότερη', L, 514, quarter, 58, { disabled: off });
-  button('tbl:bigger', 'Μεγαλύτερη', L + (quarter + gap), 514, quarter, 58, { disabled: off });
-  button('tbl:down', 'Χαμηλότερα', L + 2 * (quarter + gap), 514, quarter, 58, { disabled: off });
-  button('tbl:up', 'Ψηλότερα', L + 3 * (quarter + gap), 514, quarter, 58, { disabled: off });
-
-  section(614, xr.mode === 'walk' ? 'Μετάβαση σε σημείο' : 'Σημεία');
-  TELEPORT.forEach((id, i) => {
-    const r = Math.floor(i / 2), cI = i % 2;
-    button(`poi:${id}`, POI[id].name, L + cI * (half + gap), 628 + r * 62, half, 54, { active: state.selected === id });
+const smoothstep = (t) => t * t * (3 - 2 * t);
+const pairs = (flat) => { const out = []; for (let i = 0; i < flat.length; i += 2) out.push([flat[i], flat[i + 1]]); return out; };
+function distSeg(px, pz, ax, az, bx, bz) {
+  const dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz;
+  const t = L2 ? Math.max(0, Math.min(1, ((px - ax) * dx + (pz - az) * dz) / L2)) : 0;
+  return Math.hypot(px - ax - t * dx, pz - az - t * dz);
+}
+function pointInPoly(x, z, pts) {
+  let inside = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const [xi, zi] = pts[i], [xj, zj] = pts[j];
+    if ((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) inside = !inside;
+  }
+  return inside;
+}
+function distPoly(x, z, pts) {
+  if (pointInPoly(x, z, pts)) return 0;
+  let d = Infinity;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) d = Math.min(d, distSeg(x, z, pts[j][0], pts[j][1], pts[i][0], pts[i][1]));
+  return d;
+}
+function nearLine(x, z, pts) {
+  let best = { d: Infinity, y: 0 };
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [ax, az, ay] = pts[i], [bx, bz, by] = pts[i + 1];
+    const dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz;
+    const t = L2 ? Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / L2)) : 0;
+    const d = Math.hypot(x - ax - t * dx, z - az - t * dz);
+    if (d < best.d) best = { d, y: ay + (by - ay) * t };
+  }
+  return best;
+}
+// Επιπεδώσεις του εδάφους: κύκλος, πολύγωνο ή λωρίδα κατά μήκος γραμμής με δικό της ύψος
+function applyPads(h, x, z, pads) {
+  for (const p of pads) {
+    let d, y = p.y;
+    if (p.kind === 'circle') d = Math.hypot(x - p.x, z - p.z) - p.r;
+    else if (p.kind === 'poly') d = distPoly(x, z, p.pts);
+    else { const n = nearLine(x, z, p.pts); d = n.d - p.half; y = n.y; }
+    const w = d <= 0 ? 1 : d >= p.blend ? 0 : smoothstep(1 - d / p.blend);
+    if (w > 0) h += (y - h) * w;
+  }
+  return h;
+}
+function densify(pts, maxSeg, closed = true) {
+  const out = [], n = pts.length, m = closed ? n : n - 1;
+  for (let i = 0; i < m; i++) {
+    const a = pts[i], b = pts[(i + 1) % n];
+    const k = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / maxSeg));
+    for (let j = 0; j < k; j++) out.push(a.map((v, c) => v + (b[c] - v) * j / k));
+  }
+  if (!closed) out.push(pts[n - 1].slice());
+  return out;
+}
+// Παράλληλη μετατόπιση ανοιχτής γραμμής: θετικό d προς τα αριστερά της φοράς (z προς νότο)
+function offsetLine(pts, d) {
+  return pts.map((p, i) => {
+    let nx = 0, nz = 0;
+    for (const j of [i - 1, i]) {
+      if (j < 0 || j >= pts.length - 1) continue;
+      const dx = pts[j + 1][0] - pts[j][0], dz = pts[j + 1][1] - pts[j][1], L = Math.hypot(dx, dz) || 1;
+      nx += dz / L; nz += -dx / L;
+    }
+    const L = Math.hypot(nx, nz) || 1;
+    return [p[0] + nx / L * d, p[1] + nz / L * d, ...p.slice(2)];
   });
-
-  const poi = POI[state.selected];
-  const infoY = 984;
-  g.fillStyle = '#F2F4F5'; g.font = `700 32px ${DISPLAY_FONT}`;
-  g.fillText(poi.name, L, infoY);
-  g.font = `400 24px ${UI_FONT}`; g.fillStyle = '#D5DCE0';
-  wrap(g, poi.text, W - 200).slice(0, 4).forEach((ln, i) => g.fillText(ln, L, infoY + 36 + i * 30));
-  button('exit', 'Έξοδος', MENU_W - 40 - 170, 1124, 170, 54);
-  menuTex.needsUpdate = true;
-}
-function placeMenu() {
-  if (!xr.session) return;
-  readHead();
-  const f = forwardOf(head.yaw);
-  const left = new THREE.Vector3(-f.z, 0, f.x).multiplyScalar(-1);
-  menu.position.copy(head.pos).addScaledVector(f, 0.62).addScaledVector(left, 0.3);
-  menu.position.y = head.pos.y - 0.14;
-  menu.lookAt(head.pos);
 }
 
-function runAction(id) {
-  if (id === 'mode:table') { xr.mode = 'table'; placeTable(); }
-  else if (id === 'mode:walk') { xr.mode = 'walk'; teleport(POI[state.selected].stand ? POI[state.selected] : POI.court); }
-  else if (id === 'view:today') setView('today');
-  else if (id === 'view:recon') setView('recon');
-  else if (id === 'tog:evans') setEvans(!state.evans);
-  else if (id === 'tog:labels') setLabels(!state.labels);
-  else if (id.startsWith('tbl:')) {
-    const t = xr.table, step = id.slice(4);
-    if (step === 'rotl') t.rot -= Math.PI / 8;
-    if (step === 'rotr') t.rot += Math.PI / 8;
-    if (step === 'smaller') t.scale = Math.max(1 / 600, t.scale / 1.25);
-    if (step === 'bigger') t.scale = Math.min(1 / 50, t.scale * 1.25);
-    if (step === 'down') t.dy -= 0.05;
-    if (step === 'up') t.dy += 0.05;
-    placeTable();
+// Επιφάνεια εδάφους με πλαϊνά και βάση (μακέτα πάνω σε βάθρο)
+function terrainMesh({ x0, x1, z0, z1, step, height, color, base, sides = 'nsew' }) {
+  const nx = Math.round((x1 - x0) / step) + 1, nz = Math.round((z1 - z0) / step) + 1;
+  const pos = new Float32Array(nx * nz * 3);
+  for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
+    const x = x0 + (x1 - x0) * i / (nx - 1), z = z0 + (z1 - z0) * j / (nz - 1), o = (j * nx + i) * 3;
+    pos[o] = x; pos[o + 1] = height(x, z); pos[o + 2] = z;
   }
-  else if (id.startsWith('poi:')) {
-    const poi = POI[id.slice(4)];
-    selectPoi(poi.id);
-    if (xr.mode === 'walk') teleport(poi);
+  const idx = [];
+  for (let j = 0; j < nz - 1; j++) for (let i = 0; i < nx - 1; i++) {
+    const a = j * nx + i, b = a + 1, c = a + nx, d = c + 1;
+    idx.push(a, c, b, b, c, d);
   }
-  else if (id === 'exit') xr.session?.end();
-  drawMenu();
-}
-function hitTest(entry) {
-  tmpMat.identity().extractRotation(entry.ctrl.matrixWorld);
-  raycaster.ray.origin.setFromMatrixPosition(entry.ctrl.matrixWorld);
-  raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tmpMat);
-  if (menu.visible) {
-    const hit = raycaster.intersectObject(menu, false)[0];
-    if (hit && hit.uv) {
-      const px = hit.uv.x * MENU_W, py = (1 - hit.uv.y) * MENU_H;
-      const b = menuButtons.find((m) => px >= m.x && px <= m.x + m.w && py >= m.y && py <= m.y + m.h);
-      return { point: hit.point, distance: hit.distance, button: b ? b.id : null, onMenu: true };
+  const top = new THREE.BufferGeometry();
+  top.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  top.setIndex(idx);
+  top.computeVertexNormals();
+  const nrm = top.attributes.normal, cols = new Float32Array(nx * nz * 3);
+  for (let k = 0; k < nx * nz; k++) {
+    const rgb = color(pos[k * 3], pos[k * 3 + 2], pos[k * 3 + 1], nrm.getY(k));
+    _c.setRGB(rgb[0], rgb[1], rgb[2], THREE.SRGBColorSpace);
+    cols[k * 3] = _c.r; cols[k * 3 + 1] = _c.g; cols[k * 3 + 2] = _c.b;
+  }
+  top.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+  const topMesh = new THREE.Mesh(top, new THREE.MeshLambertMaterial({ vertexColors: true }));
+  topMesh.receiveShadow = true;
+  // Πλαϊνά: από την άκρη της επιφάνειας ως τη βάση
+  const sp = [];
+  const edge = (list) => {
+    for (let k = 0; k < list.length - 1; k++) {
+      const a = list[k], b = list[k + 1];
+      const A = [pos[a * 3], pos[a * 3 + 1], pos[a * 3 + 2]], B = [pos[b * 3], pos[b * 3 + 1], pos[b * 3 + 2]];
+      sp.push(...A, A[0], base, A[2], ...B, ...B, A[0], base, A[2], B[0], base, B[2]);
     }
-  }
-  if (state.labels) {
-    const hit = raycaster.intersectObjects(visibleLabels(), false)[0];
-    if (hit) return { point: hit.point, distance: hit.distance, poi: hit.object.userData.poi };
-  }
-  return null;
-}
-function onSelect(entry) {
-  if (!xr.session) return;
-  const hit = hitTest(entry);
-  if (!hit) return;
-  if (hit.button) runAction(hit.button);
-  else if (hit.poi) selectPoi(hit.poi);
-}
-function updatePointers() {
-  let changed = false;
-  for (const entry of controllers) {
-    if (!entry.source || entry.source.targetRayMode !== 'tracked-pointer') { entry.cursor.visible = false; continue; }
-    const hit = hitTest(entry);
-    const hov = hit && hit.button ? hit.button : null;
-    if (hov !== entry.hover) { entry.hover = hov; changed = true; }
-    entry.ray.scale.z = hit ? hit.distance : 3;
-    entry.cursor.visible = !!hit;
-    if (hit) { entry.cursor.position.copy(hit.point); entry.cursor.lookAt(head.pos); }
-  }
-  if (changed) drawMenu();
+  };
+  const row = (j, rev) => { const l = []; for (let i = 0; i < nx; i++) l.push(j * nx + i); return rev ? l.reverse() : l; };
+  const colm = (i, rev) => { const l = []; for (let j = 0; j < nz; j++) l.push(j * nx + i); return rev ? l.reverse() : l; };
+  if (sides.includes('n')) edge(row(0, true));
+  if (sides.includes('s')) edge(row(nz - 1, false));
+  if (sides.includes('w')) edge(colm(0, false));
+  if (sides.includes('e')) edge(colm(nx - 1, true));
+  sp.push(x0, base, z0, x1, base, z0, x1, base, z1, x0, base, z0, x1, base, z1, x0, base, z1);
+  const skirt = new THREE.BufferGeometry();
+  skirt.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
+  skirt.computeVertexNormals();
+  const skirtMesh = new THREE.Mesh(skirt, new THREE.MeshLambertMaterial({ color: HEX.skirt, side: THREE.DoubleSide }));
+  const g = new THREE.Group();
+  g.add(topMesh, skirtMesh);
+  return g;
 }
 
-async function enterXR(kind) {
-  const type = kind === 'vr' ? 'immersive-vr' : 'immersive-ar';
-  try {
-    const session = await navigator.xr.requestSession(type, { optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking'] });
-    let ref = 'local-floor';
-    try { await session.requestReferenceSpace('local-floor'); } catch (e) { ref = 'local'; }
-    xr.refType = ref;
-    renderer.xr.setReferenceSpaceType(ref);
-    await renderer.xr.setSession(session);
-    xr.session = session; xr.kind = kind; xr.mode = 'table'; xr.needsPlacement = 3;
-    xr.table = { scale: 1 / 250, rot: 0, dy: 0 };
-    session.addEventListener('end', onXREnd);
-    scene.background = kind === 'ar' ? null : sceneColor();
-    sun.castShadow = false;
-    camera.near = 0.02; camera.far = 1500; camera.updateProjectionMatrix();
-    controls.enabled = false;
-    controllers.forEach((c) => { c.hand.visible = kind === 'vr'; });
-    menu.visible = true;
-    drawMenu();
-    note('');
-  } catch (err) {
-    note('Ο browser δεν επέτρεψε τη συνεδρία XR. Ανοίξτε την εφαρμογή απευθείας από τη διεύθυνσή της στο GitHub Pages, μέσα στον browser των γυαλιών.', true);
+// Τοίχος από πολύγωνο κάτοψης (εξωτερική και εσωτερική παρειά). Βάση και στέψη ορίζονται ανά κορυφή.
+function bandGeometry(ring, botFn, topFn, S) {
+  const n = ring.length;
+  let area = 0;
+  for (let i = 0; i < n; i++) { const a = ring[i], b = ring[(i + 1) % n]; area += a[0] * b[1] - b[0] * a[1]; }
+  const bot = ring.map(([x, z]) => botFn(x, z)), top = ring.map(([x, z]) => topFn(x, z));
+  const P = [], U = [];
+  const tri = (a, b, c, ua, ub, uc, nx, ny, nz) => {
+    const e1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], e2 = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    const cx = e1[1] * e2[2] - e1[2] * e2[1], cy = e1[2] * e2[0] - e1[0] * e2[2], cz = e1[0] * e2[1] - e1[1] * e2[0];
+    if (cx * nx + cy * ny + cz * nz < 0) { [b, c] = [c, b]; [ub, uc] = [uc, ub]; }
+    P.push(...a, ...b, ...c); U.push(...ua, ...ub, ...uc);
+  };
+  const tris = THREE.ShapeUtils.triangulateShape(ring.map(([x, z]) => new THREE.Vector2(x, z)), []);
+  for (const [a, b, c] of tris) {
+    const va = [ring[a][0], top[a], ring[a][1]], vb = [ring[b][0], top[b], ring[b][1]], vc = [ring[c][0], top[c], ring[c][1]];
+    tri(va, vb, vc, [va[0] / S, va[2] / S], [vb[0] / S, vb[2] / S], [vc[0] / S, vc[2] / S], 0, 1, 0);
   }
-}
-function onXREnd() {
-  xr.session = null; xr.kind = null;
-  world.position.set(0, 0, 0); world.rotation.set(0, 0, 0); world.scale.setScalar(1);
-  menu.visible = false;
-  controllers.forEach((c) => { c.cursor.visible = false; c.hover = null; });
-  scene.background = sceneColor();
-  sun.castShadow = true;
-  camera.near = 0.5; camera.far = 3000; camera.updateProjectionMatrix();
-  controls.enabled = true;
-  resize();
+  const sign = area > 0 ? 1 : -1;
+  let s = 0;
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n, [ax, az] = ring[i], [bx, bz] = ring[j], L = Math.hypot(bx - ax, bz - az);
+    if (L < 1e-4) continue;
+    if (top[i] - bot[i] > 0.01 || top[j] - bot[j] > 0.01) {
+      const ox = sign * (bz - az), oz = -sign * (bx - ax);
+      const Ab = [ax, bot[i], az], Bb = [bx, bot[j], bz], Bt = [bx, top[j], bz], At = [ax, top[i], az];
+      const uA = s / S, uB = (s + L) / S;
+      tri(Ab, Bb, Bt, [uA, Ab[1] / S], [uB, Bb[1] / S], [uB, Bt[1] / S], ox, 0, oz);
+      tri(Ab, Bt, At, [uA, Ab[1] / S], [uB, Bt[1] / S], [uA, At[1] / S], ox, 0, oz);
+    }
+    s += L;
+  }
+  const geom = new THREE.BufferGeometry();
+  geom.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  geom.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+  geom.computeVertexNormals();
+  return geom;
 }
 
 /* ------------------------------------------------------------------
-   Θέμα, μέγεθος, βρόχος απόδοσης
+   Σημεία ενδιαφέροντος. Το y είναι ύψος πάνω από το έδαφος· η θέση
+   στάσης (stand) παίρνει το ύψος του εδάφους.
    ------------------------------------------------------------------ */
-function sceneColor() {
-  const v = getComputedStyle(document.documentElement).getPropertyValue('--scene').trim() || '#DCE2E5';
-  return new THREE.Color(v);
-}
-function refreshTheme() { if (!(xr.session && xr.kind === 'ar')) scene.background = sceneColor(); }
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', refreshTheme);
-new MutationObserver(refreshTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+const MYK_POIS = [
+  { id: 'lion', group: 'Είσοδος και τείχη', name: 'Πύλη των Λεόντων', p: [0.5, 7.6, -0.3], stand: [-6.4, 0, -10.6], yaw: 149, view: [-0.52, -0.86],
+    text: 'Η κύρια είσοδος της ακρόπολης, γύρω στο 1250 π.Χ. Το άνοιγμα έχει πλάτος περίπου 3 μ. Πάνω από το μονολιθικό υπέρθυρο, μήκους 4,5 μ., το ανακουφιστικό τρίγωνο κλείνει με ανάγλυφη πλάκα: δύο λιοντάρια στηρίζουν τα μπροστινά πόδια σε βωμούς, δεξιά και αριστερά από έναν κίονα. Τα κεφάλια τους ήταν ξεχωριστά κομμάτια και δεν σώθηκαν.' },
+  { id: 'bastion', group: 'Είσοδος και τείχη', name: 'Προμαχώνας', p: [-13, 5, -2], stand: null, yaw: 0, view: [-0.75, -0.66],
+    text: 'Ο προμαχώνας και το τείχος στενεύουν την προσέγγιση σε αυλή πλάτους περίπου 7 μ. μπροστά στην πύλη. Όποιος πλησίαζε είχε εκτεθειμένη τη δεξιά του πλευρά, που δεν την κάλυπτε η ασπίδα.' },
+  { id: 'walls', group: 'Είσοδος και τείχη', name: 'Κυκλώπεια τείχη', p: [62, 4, -27], stand: null, yaw: 0,
+    text: 'Μήκος περίπου 900 μ., πάχος 5,5 έως 7,5 μ., ύψος έως 12 μ. Χτίστηκαν σε τρεις φάσεις, από το 1350 ως το 1200 π.Χ. περίπου. Οι μεταγενέστεροι Έλληνες πίστευαν ότι μόνο οι Κύκλωπες μπορούσαν να σηκώσουν τόσο μεγάλους ογκόλιθους.' },
+  { id: 'granary', group: 'Είσοδος και τείχη', name: 'Σιταποθήκη', p: [-6, 2.5, 14], stand: null, yaw: 0,
+    text: 'Στενό κτίριο ανάμεσα στο τείχος και στον Ταφικό Κύκλο Α, δίπλα στην πύλη. Πήρε το όνομά του από απανθρακωμένους σπόρους σιταριού που βρέθηκαν σε πιθάρια στο υπόγειό του.' },
+  { id: 'northgate', group: 'Είσοδος και τείχη', name: 'Βόρεια Πύλη', p: [182.4, 4.5, 3.4], stand: [175.5, 0, 4.2], yaw: 90, view: [0.8, -0.6],
+    text: 'Μικρότερη πύλη στο βόρειο τείχος, με μονολιθικό υπέρθυρο και ανακουφιστικό τρίγωνο χωρίς ανάγλυφο. Χτίστηκε την ίδια εποχή με την Πύλη των Λεόντων.' },
+  { id: 'cistern', group: 'Είσοδος και τείχη', name: 'Υπόγεια δεξαμενή', p: [259, 2, -5], stand: [252.5, 0, 5], yaw: 30,
+    text: 'Στη βορειοανατολική επέκταση του τείχους, γύρω στο 1200 π.Χ. Στενός διάδρομος με εκφορική στέγη κατεβαίνει με 99 σκαλοπάτια, κάτω από το τείχος, σε δεξαμενή λαξευμένη στον βράχο, 15 μ. κάτω από την επιφάνεια. Τη γέμιζε αγωγός από την πηγή Περσεία.' },
+  { id: 'gca', group: 'Ταφικοί χώροι', name: 'Ταφικός Κύκλος Α', p: [-1.5, 0.6, 37.5], stand: [19.6, 0, 38], yaw: 270,
+    text: 'Βασιλικό νεκροταφείο του 16ου αιώνα π.Χ. με έξι λακκοειδείς τάφους και 19 ταφές. Αρχικά ήταν έξω από τα τείχη. Γύρω στο 1250 π.Χ. το τείχος επεκτάθηκε για να τον περικλείσει και χτίστηκε ο διπλός κύκλος από όρθιες πλάκες, διαμέτρου 27,5 μ. Εδώ ο Σλήμαν βρήκε το 1876 τη χρυσή προσωπίδα που έγινε γνωστή ως «προσωπίδα του Αγαμέμνονα».' },
+  { id: 'gcb', group: 'Ταφικοί χώροι', name: 'Ταφικός Κύκλος Β', p: [-90, 1, 2], stand: null, yaw: 0,
+    text: 'Παλαιότερος ταφικός περίβολος, του 17ου και 16ου αιώνα π.Χ., περίπου 150 μ. δυτικά της Πύλης των Λεόντων, έξω από τα τείχη. Έχει διάμετρο περίπου 28 μ. και περιείχε λακκοειδείς και κιβωτιόσχημους τάφους.' },
+  { id: 'treasury', group: 'Ταφικοί χώροι', name: 'Θησαυρός του Ατρέα', p: [-72, 1, 174], stand: null, yaw: 0,
+    text: 'Ο μεγαλύτερος θολωτός τάφος των Μυκηνών, γύρω στο 1250 π.Χ., περίπου 500 μ. νοτιοδυτικά της Πύλης των Λεόντων. Θα τον βρείτε στον χώρο «Θησαυρός του Ατρέα».' },
+  { id: 'ramp', group: 'Ανάκτορο', name: 'Μεγάλη Ράμπα', p: [22.5, 1.2, 45], stand: [10.6, 0, 18.5], yaw: 156,
+    text: 'Λιθόστρωτη ανηφορική ράμπα, πλάτους 4 έως 5,75 μ., που ξεκινά πίσω από την Πύλη των Λεόντων και οδηγεί προς το ανάκτορο. Αναλημματικός τοίχος τη στηρίζει από την πλευρά του Ταφικού Κύκλου Α.' },
+  { id: 'propylon', group: 'Ανάκτορο', name: 'Πρόπυλο', p: [88, 4.5, 28], stand: [79.5, 0, 21.5], yaw: 128,
+    text: 'Η μνημειακή είσοδος του ανακτόρου στη βορειοδυτική του πλευρά. Δύο στοές με έναν κίονα η καθεμιά, η μία πίσω από την άλλη.' },
+  { id: 'court', group: 'Ανάκτορο', name: 'Μεγάλη Αυλή', p: [110.4, 0.5, 57.5], stand: [104.6, 0, 56.3], yaw: 101,
+    text: 'Η αυλή μπροστά στο μέγαρο, περίπου 11 επί 15 μ. Το δάπεδό της ήταν επιχρισμένο και ζωγραφισμένο σε τετράγωνα. Από εδώ περνούσε κανείς στο μέγαρο.' },
+  { id: 'megaron', group: 'Ανάκτορο', name: 'Μέγαρο', p: [132.3, 0.6, 59.0], stand: [127.6, 0, 58.0], yaw: 101,
+    text: 'Η αίθουσα του θρόνου: πρόστοο με δύο κίονες, πρόδομος και ο κύριος χώρος, ο δόμος, περίπου 13 επί 11,5 μ. Στο κέντρο βρισκόταν η κυκλική εστία, διαμέτρου 3,4 μ., ανάμεσα σε τέσσερις κίονες που στήριζαν τη στέγη. Ο θρόνος ήταν μάλλον στη νότια πλευρά.' },
+  { id: 'stair', group: 'Ανάκτορο', name: 'Μεγάλο Κλιμακοστάσιο', p: [92.5, 2, 63.5], stand: null, yaw: 0,
+    text: 'Μνημειακή σκάλα στη νοτιοδυτική πλευρά του ανακτόρου. Ανέβαινε στη Μεγάλη Αυλή από τα χαμηλότερα επίπεδα της ακρόπολης.' },
+  { id: 'cult', group: 'Οικισμός', name: 'Θρησκευτικό Κέντρο', p: [70, 3, 113], stand: [49, 0, 96], yaw: 125,
+    text: 'Συγκρότημα ιερών στη νοτιοδυτική πλαγιά, μέσα στα τείχη. Εδώ βρέθηκαν πήλινα ειδώλια, τοιχογραφίες και βωμοί. Συνδεόταν με το ανάκτορο με πομπικό δρόμο.' },
+  { id: 'warrior', group: 'Οικισμός', name: 'Οικία του Αγγείου των Πολεμιστών', p: [8, 3, 66], stand: null, yaw: 0,
+    text: 'Πήρε το όνομά της από τον κρατήρα που βρέθηκε εδώ, με πολεμιστές που ξεκινούν για τη μάχη και μια γυναίκα που τους αποχαιρετά. Σήμερα βρίσκεται στο Εθνικό Αρχαιολογικό Μουσείο.' },
+  { id: 'northq', group: 'Οικισμός', name: 'Βόρεια Συνοικία', p: [30, 3, -19], stand: null, yaw: 0,
+    text: 'Κτίρια και αποθήκες στη βόρεια πλευρά, ανάμεσα στην Πύλη των Λεόντων και στο ανάκτορο.' },
+  { id: 'artisans', group: 'Οικισμός', name: 'Εργαστήρια τεχνιτών', p: [184, 3, 51], stand: null, yaw: 0,
+    text: 'Χώροι εργασίας τεχνιτών κοντά στο ανάκτορο, όπου κατεργάζονταν ελεφαντοστό, πολύτιμους λίθους και μέταλλα.' },
+  { id: 'columns', group: 'Οικισμός', name: 'Οικία των Κιόνων', p: [202, 3, 51], stand: [191, 0, 45], yaw: 100,
+    text: 'Μεγάλο κτίριο στα ανατολικά του ανακτόρου, με εσωτερική αυλή που την περιέβαλλαν κίονες. Ίσως διοικητικό κτίριο ή κατοικία αξιωματούχου.' },
+];
 
-function resize() {
-  if (renderer.xr.isPresenting) return;
-  const w = Math.max(stage.clientWidth, 1), h = Math.max(stage.clientHeight, 1);
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-}
-new ResizeObserver(resize).observe(stage);
+function buildMykines(s) {
+  const dem = makeDem(MYK.grid);
+  const THETA = Math.atan2(0.1977, 0.9803);           // άξονας του μεγάρου, 11,4° νότια της ανατολής
+  const PAL = { ox: 121.2, oz: 49.2 };
+  const palW = (u, v) => [PAL.ox + u * Math.cos(THETA) - v * Math.sin(THETA), PAL.oz + u * Math.sin(THETA) + v * Math.cos(THETA)];
+  const palLocal = (x, z) => [(x - PAL.ox) * Math.cos(THETA) + (z - PAL.oz) * Math.sin(THETA), -(x - PAL.ox) * Math.sin(THETA) + (z - PAL.oz) * Math.cos(THETA)];
+  const YC = 35.2;                                      // στάθμη της Μεγάλης Αυλής
+  const RAMP = [[1.0, 2.5, 0.15], [6.5, 12, 2.4], [13, 24, 5.0], [18.5, 35, 7.3], [22.5, 45, 8.8], [32, 44.5, 11.4], [45, 40, 15.6], [58, 33, 19.8], [70, 27, 23.2], [80, 22, 25.4], [86, 26.5, 29.4]];
+  const STAIR = [[86.5, 67, 0], [99.5, 59.5, YC]];
+  const SIGNS = { compass: [-92, -92], scale: [262, 197], treasury: [-72, 182], gcb: [-90, 10] };
+  const palPoly = [palW(-18, -1.5), palW(20.5, -1.5), palW(20.5, 18), palW(-18, 18)];
+  const pads = [
+    { kind: 'circle', x: 0.5, z: -0.3, r: 4.5, blend: 5, y: 0 },
+    { kind: 'line', pts: [[0.5, -0.3, 0], [-6.5, -10.8, -0.35], [-13, -21, -1.1]], half: 3.5, blend: 5 },
+    { kind: 'line', pts: RAMP, half: 3.0, blend: 4 },
+    { kind: 'circle', x: -1.5, z: 37.5, r: 14.4, blend: 2, y: -1.0 },
+    { kind: 'circle', x: 88.5, z: 27.5, r: 6, blend: 5, y: 30 },
+    { kind: 'poly', pts: palPoly, blend: 6, y: YC },
+  ];
+  STAIR[0][2] = applyPads(dem(86.5, 67), 86.5, 67, pads);
+  pads.push({ kind: 'line', pts: STAIR, half: 2.2, blend: 2 });
+  for (const [x, z] of [SIGNS.compass, SIGNS.treasury, SIGNS.gcb]) pads.push({ kind: 'circle', x, z, r: 11, blend: 6, y: dem(x, z) });
+  pads.push({ kind: 'poly', pts: [[230, 190], [294, 190], [294, 204], [230, 204]], blend: 6, y: dem(262, 197) });
+  const gy = (x, z) => applyPads(dem(x, z), x, z, pads);
+  s.ground = gy;
+  const levelG = (x, z) => { let m = gy(x, z); for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; m = Math.max(m, gy(x + 3.5 * Math.cos(a), z + 3.5 * Math.sin(a))); } return m; };
 
-renderer.setAnimationLoop(() => {
-  if (renderer.xr.isPresenting) {
-    if (xr.needsPlacement > 0 && --xr.needsPlacement === 0) { placeTable(); placeMenu(); drawMenu(); }
-    readHead();
-    updatePointers();
-  } else {
-    stepFlight(performance.now());
-    controls.update();
+  for (const poi of s.pois) {
+    poi.p = [poi.p[0], gy(poi.p[0], poi.p[2]) + poi.p[1], poi.p[2]];
+    if (poi.stand) poi.stand = [poi.stand[0], gy(poi.stand[0], poi.stand[2]), poi.stand[2]];
   }
-  updateLabels();
-  renderer.render(scene, camera);
-});
+
+  const outline = pairs(MYK.outline), summit = pairs(MYK.bldg.summit);
+  const BASE = -40;
+
+  // Έδαφος: μέσα στα τείχη πατημένο χώμα, έξω θαμνώδης πλαγιά, βράχος στις απότομες κλίσεις και στην κορυφή
+  const hash = (x, z) => { const v = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return v - Math.floor(v); };
+  const terrain = terrainMesh({
+    x0: -110, x1: 330, z0: -110, z1: 210, step: 3, base: BASE, height: gy,
+    color: (x, z, y, ny) => {
+      let c = pointInPoly(x, z, outline) ? [0.71, 0.65, 0.53] : [0.58, 0.58, 0.42];
+      const rock = Math.max(smoothstep(Math.min(Math.max((0.93 - ny) / 0.22, 0), 1)), pointInPoly(x, z, summit) ? 0.55 : 0);
+      c = c.map((v, i) => v + ([0.6, 0.56, 0.5][i] - v) * rock);
+      const k = 0.93 + 0.12 * hash(Math.round(x / 3), Math.round(z / 3));
+      return c.map((v) => v * k);
+    },
+  });
+  s.root.add(terrain);
+
+  // Κυκλώπεια τείχη: κάτω ζώνη σήμερα, συμπλήρωση ως το αρχικό ύψος στην αναπαράσταση
+  const cyclo = texMat('cyclo', () => cyclopeanCanvas(512, 6, 5), 0xE9DFCB);
+  const cycloUp = texMat('cycloUp', () => cyclopeanCanvas(512, 6, 5), 0xFFF8EA);
+  const gateD = (x, z) => Math.hypot(x - 0.5, z + 0.3);
+  const wave = (x, z) => 0.6 * Math.sin(x * 0.11 + z * 0.07) + 0.4 * Math.sin(x * 0.031 - z * 0.05 + 1.3);
+  const hToday = {
+    west: (x, z) => 3.4 + 1.1 * wave(x, z) + 4.0 * Math.max(0, 1 - gateD(x, z) / 32),
+    north: (x, z) => 3.0 + 1.2 * wave(x, z) + 3.8 * Math.max(0, 1 - gateD(x, z) / 32) + (x > 150 ? 1.0 : 0),
+    ne: (x, z) => 3.3 + 1.0 * wave(x, z),
+    south: (x, z) => 0.5 + 0.3 * wave(x, z),
+  };
+  const H_RECON = 8;
+  for (const [name, flat] of Object.entries(MYK.rings)) {
+    const ring = densify(pairs(flat), 3);
+    const top = new Map(ring.map(([x, z]) => [`${x},${z}`, levelG(x, z)]));
+    const topOf = (x, z) => top.get(`${x},${z}`) ?? levelG(x, z);
+    const low = new THREE.Mesh(bandGeometry(ring, (x, z) => gy(x, z) - 3, (x, z) => topOf(x, z) + hToday[name](x, z), 6), cyclo);
+    const up = new THREE.Mesh(bandGeometry(ring, (x, z) => topOf(x, z) + hToday[name](x, z), (x, z) => topOf(x, z) + H_RECON, 6), cycloUp);
+    for (const m of [low, up]) { m.castShadow = true; m.receiveShadow = true; }
+    s.root.add(low);
+    s.recon.add(up);
+  }
+
+  // Πύλη των Λεόντων: τοπικό σύστημα με x κατά μήκος του τείχους και z προς το εσωτερικό. Εξωτερική όψη στο z = 0.
+  const ashlarC = texMat('ashlarC', () => ashlarCanvas({ rows: 9, minLen: 0.14, maxLen: 0.32, base: [190, 175, 146], seedValue: 4 }));
+  const monolith = mat(0xA99880);
+  {
+    const g = new THREE.Group();
+    const tx = 7.6 / Math.hypot(7.6, 4.6), tz = -4.6 / Math.hypot(7.6, 4.6);
+    g.position.set(0.5, 0, -0.3);
+    g.rotation.y = Math.atan2(-tz, tx);
+    const HG = 8.0;
+    const mass = shapeOf([[-4.45, -1.5], [4.45, -1.5], [4.45, HG], [-4.45, HG]]);
+    mass.holes.push(new THREE.Path([[-1.55, 0], [1.55, 0], [1.42, 3.1], [-1.42, 3.1]].map(([x, y]) => new THREE.Vector2(x, y))));
+    mass.holes.push(new THREE.Path([[-1.9, 3.95], [1.9, 3.95], [0, 7.3]].map(([x, y]) => new THREE.Vector2(x, y))));
+    const wallMesh = new THREE.Mesh(extrude(mass, 2.6, 6), ashlarC);
+    const upper = new THREE.Mesh(texBox(8.9, 2.5, 2.6, 6).translate(0, HG + 1.25, 1.3), texMat('ashlarCUp', () => ashlarCanvas({ rows: 9, minLen: 0.14, maxLen: 0.32, base: [226, 216, 196], seedValue: 4 })));
+    const jambs = [-1.95, 1.95].map((x) => new THREE.Mesh(new THREE.BoxGeometry(0.8, 3.1, 2.06).translate(x, 1.55, 1.0), monolith));
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.85, 2.08).translate(0, 3.525, 1.0), monolith);
+    const slab = new THREE.Mesh(extrude(shapeOf([[-1.85, 0], [1.85, 0], [0, 3.3]]), 0.7, 3).translate(0, 3.95, 0), mat(0x9C9384));
+    // Ανάγλυφο: κίονας πάνω σε βωμούς, δύο λιοντάρια χωρίς κεφάλια
+    const relief = [];
+    const lion = [[1.6, 0.05], [1.15, 0.05], [1.12, 0.5], [0.85, 0.72], [0.66, 0.6], [0.44, 0.6], [0.42, 0.9], [0.42, 1.35], [0.5, 1.8], [0.68, 1.95], [0.82, 1.78], [1.0, 1.35], [1.25, 1.0], [1.36, 0.8], [1.52, 0.45]];
+    relief.push(shapeOf(lion), shapeOf(lion.map(([x, y]) => [-x, y]).reverse()));
+    relief.push(shapeOf([[-0.62, 0.05], [0.62, 0.05], [0.62, 0.5], [-0.62, 0.5]]), shapeOf([[-0.68, 0.5], [0.68, 0.5], [0.68, 0.58], [-0.68, 0.58]]));
+    relief.push(shapeOf([[-0.12, 0.58], [0.12, 0.58], [0.17, 1.95], [-0.17, 1.95]]), shapeOf([[-0.26, 1.95], [0.26, 1.95], [0.3, 2.12], [-0.3, 2.12]]));
+    relief.push(shapeOf([[-0.3, 2.12], [0.3, 2.12], [0.3, 2.22], [-0.3, 2.22]]), shapeOf([[-0.33, 2.4], [0.33, 2.4], [0.3, 2.48], [-0.3, 2.48]]));
+    for (const x of [-0.22, -0.075, 0.075, 0.22]) { const d = new THREE.Shape(); d.absarc(x, 2.31, 0.065, 0, Math.PI * 2); relief.push(d); }
+    const reliefMesh = new THREE.Mesh(mergeGeometries(relief.map((sh) => extrude(sh, 0.18, 3))).translate(0, 3.95, -0.18), mat(0xE2DACA));
+    for (const m of [wallMesh, upper, ...jambs, lintel, slab, reliefMesh]) { m.castShadow = true; m.receiveShadow = true; }
+    g.add(wallMesh, ...jambs, lintel, slab, reliefMesh);
+    s.root.add(g);
+    const gr = g.clone(false);
+    gr.add(upper);
+    s.recon.add(gr);
+  }
+
+  // Βόρεια Πύλη: άνοιγμα προς τα ανατολικά, μέσα στον εγκάρσιο τοίχο
+  {
+    const g = new THREE.Group();
+    const y0 = gy(182.6, 3.4);
+    g.position.set(182.6, y0, 3.4);
+    g.rotation.y = -Math.PI / 2;
+    const HG = 5.0;
+    const mass = shapeOf([[-1.75, -1.5], [1.75, -1.5], [1.75, HG], [-1.75, HG]]);
+    mass.holes.push(new THREE.Path([[-0.75, 0], [0.75, 0], [0.7, 2.4], [-0.7, 2.4]].map(([x, y]) => new THREE.Vector2(x, y))));
+    mass.holes.push(new THREE.Path([[-0.85, 3.2], [0.85, 3.2], [0, 4.4]].map(([x, y]) => new THREE.Vector2(x, y))));
+    const wallMesh = new THREE.Mesh(extrude(mass, 2.2, 6), ashlarC);
+    const fill = new THREE.Mesh(extrude(shapeOf([[-0.85, 0], [0.85, 0], [0, 1.2]]), 0.5, 3).translate(0, 3.2, 0.35), monolith);
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.8, 2.26).translate(0, 2.8, 1.1), monolith);
+    const jambs = [-1.05, 1.05].map((x) => new THREE.Mesh(new THREE.BoxGeometry(0.6, 2.4, 2.24).translate(x, 1.2, 1.1), monolith));
+    for (const m of [wallMesh, fill, lintel, ...jambs]) { m.castShadow = true; m.receiveShadow = true; }
+    g.add(wallMesh, fill, lintel, ...jambs);
+    s.root.add(g);
+    const gr = g.clone(false);
+    gr.add(new THREE.Mesh(texBox(3.5, 3, 2.2, 6).translate(0, HG + 1.5, 1.1), TEX.ashlarCUp));
+    s.recon.add(gr);
+  }
+
+  // Τοίχοι κτιρίων πάνω στο έδαφος: η βάση ακολουθεί το χαμηλότερο σημείο, η στέψη είναι οριζόντια
+  const tseg = (x0, z0, x1, z1, t, hRel, HRel, o = {}) => {
+    const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 2.5));
+    for (let k = 0; k < n; k++) {
+      const ax = x0 + (x1 - x0) * k / n, az = z0 + (z1 - z0) * k / n, bx = x0 + (x1 - x0) * (k + 1) / n, bz = z0 + (z1 - z0) * (k + 1) / n;
+      const g0 = gy(ax, az), g1 = gy(bx, bz), gm = gy((ax + bx) / 2, (az + bz) / 2);
+      const lo = Math.min(g0, g1, gm) - 0.4, hi = Math.max(g0, g1, gm);
+      const top = o.levelTop ?? hi;
+      aseg(ax, az, bx, bz, t, { y0: lo, h: hi - lo + hRel, H: Math.max(top - lo + HRel, hi - lo + hRel), low: o.low ?? 'rubble', up: o.up ?? 'mud' });
+    }
+  };
+  const tpoly = (flat, { t = 0.8, h = 1.0, H = 4.5, roof = false, hole = null, skip = null } = {}) => {
+    const pts = pairs(flat);
+    if (pts.length > 2 && pts[0][0] === pts[pts.length - 1][0] && pts[0][1] === pts[pts.length - 1][1]) pts.pop();
+    const levelTop = Math.max(...pts.map(([x, z]) => gy(x, z)));
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length];
+      if (skip && skip((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)) continue;
+      tseg(a[0], a[1], b[0], b[1], t, h, H, { levelTop: roof ? levelTop : undefined });
+    }
+    if (roof) {
+      const sh = shapeOf(pts.map(([x, z]) => [x, -z]));
+      if (hole) sh.holes.push(new THREE.Path(hole.map(([x, z]) => new THREE.Vector2(x, -z))));
+      const geo = new THREE.ExtrudeGeometry(sh, { depth: 0.35, bevelEnabled: false }).rotateX(-Math.PI / 2).translate(0, levelTop + H, 0);
+      const m = new THREE.Mesh(geo, M.roof);
+      m.castShadow = true; m.receiveShadow = true;
+      s.recon.add(m);
+    }
+  };
+
+  // Μεγάλη Ράμπα: λιθόστρωτη λωρίδα και αναλημματικός τοίχος προς τον Ταφικό Κύκλο
+  {
+    const line = densify(RAMP.map(([x, z, y]) => [x, z, y]), 2, false);
+    const P = [];
+    const halfAt = (i) => (line[i][1] < 46 && line[i][0] < 24 ? 2.6 : 1.8);
+    const L = offsetLine(line.map(([x, z]) => [x, z]), 1), R = offsetLine(line.map(([x, z]) => [x, z]), -1);
+    for (let i = 0; i < line.length - 1; i++) {
+      const pt = (k, side) => {
+        const base = line[k], o = side > 0 ? L[k] : R[k], h = halfAt(k);
+        return [base[0] + (o[0] - base[0]) * h, base[2] + 0.18, base[1] + (o[1] - base[1]) * h];
+      };
+      const a = pt(i, 1), b = pt(i, -1), c = pt(i + 1, 1), d = pt(i + 1, -1);
+      P.push(...a, ...c, ...b, ...b, ...c, ...d);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+    geo.computeVertexNormals();
+    const pave = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: HEX.pave, side: THREE.DoubleSide }));
+    pave.receiveShadow = true;
+    s.root.add(pave);
+    const west = densify(offsetLine(RAMP.slice(1, 5).map(([x, z, y]) => [x, z, y]), -3.3), 2, false);
+    for (let i = 0; i < west.length - 1; i++) {
+      const [x0, z0, y0r] = west[i], [x1, z1, y1r] = west[i + 1];
+      const lo = Math.min(gy(x0, z0), gy(x1, z1)) - 0.5, top = Math.max(y0r, y1r) + 0.6;
+      aseg(x0, z0, x1, z1, 1.4, { y0: lo, h: top - lo, H: top - lo + 0.3, low: 'rubble', up: 'mud' });
+    }
+  }
+
+  // Ταφικός Κύκλος Α: διπλός δακτύλιος από όρθιες πλάκες, έξι λακκοειδείς τάφοι
+  {
+    const cx = -1.5, cz = 37.5, fl = -1.0, R = 13.5, n = 58;
+    const slabs = [];
+    const gapDir = Math.atan2(-0.983, 0.181);
+    for (let k = 0; k < n; k++) {
+      const a = (k + 0.5) / n * Math.PI * 2;
+      let d = Math.abs(a - gapDir) % (Math.PI * 2);
+      if (d > Math.PI) d = Math.PI * 2 - d;
+      if (d < 0.11) continue;
+      slabs.push([cx + R * Math.cos(a), fl + 0.62, cz + R * Math.sin(a), 1.62, 1.24, 1.32, -a]);
+    }
+    s.root.add(instanced(unitBox, M.relief, slabs, boxMatrix, 0.12));
+    const pit = mat(0x4B4134);
+    for (const [x, z, w, d, r] of [[-4.5, 8.5, 3.2, 4.6, 0.2], [-9, 2.5, 2.8, 3.4, 0.1], [-7.5, -5, 3.6, 4.2, 0.15], [1, 0.5, 4.5, 6.4, 0.05], [6.5, -5.5, 3.2, 4.6, 0.1], [0.5, -8.5, 3, 3.5, 0.1]]) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.06, d), pit);
+      m.position.set(cx + x, fl + 0.03, cz + z);
+      m.rotation.y = r;
+      m.receiveShadow = true;
+      s.root.add(m);
+      const rim = new THREE.Mesh(new THREE.BoxGeometry(w + 0.5, 0.04, d + 0.5), M.base);
+      rim.position.set(cx + x, fl + 0.015, cz + z);
+      rim.rotation.y = r;
+      s.root.add(rim);
+    }
+    const stelae = [[-2.5, 9.6], [2.6, -3.6], [-5.2, -2.4]].map(([x, z]) => [cx + x, fl + 0.65, cz + z, 0.9, 1.3, 0.18, 0.1]);
+    s.recon.add(instanced(unitBox, M.relief, stelae, boxMatrix, 0.05));
+  }
+
+  // Κτίρια από την κάτοψη
+  const B = MYK.bldg;
+  tpoly(B.granary, { t: 0.9, h: 2.4, H: 5, roof: true });
+  tpoly(B.warrior, { h: 1.1, H: 4.5, roof: true });
+  tpoly(B.ramphouse, { h: 1.0, H: 4.5, roof: true });
+  tpoly(B.artisans, { h: 1.0, H: 4.5, roof: true });
+  tpoly(B.houses, { h: 1.0, H: 4.5, roof: true });
+  tpoly(B.gamma, { h: 1.2, H: 4.5, roof: true });
+  tpoly(B.delta, { h: 1.2, H: 4.5, roof: true });
+  tpoly(B.throne, { h: 0.9, H: 5.5, roof: true, skip: (x, z) => { const [u, v] = palLocal(x, z); return u > -17.2 && v > 3; } });
+  tpoly(B.corridor, { h: 0.8, H: 5.0, skip: (x, z) => { const [u, v] = palLocal(x, z); return u > -2.5 || (v > 2.5 && u > -17.5); } });
+  const westRing = pairs(MYK.rings.west);
+  tpoly(B.cult, { h: 1.2, H: 4.0, skip: (x, z) => distPoly(x, z, westRing) < 2 });
+  for (const [a, b] of [[[44, 88], [36, 103]], [[62, 98], [50, 116]], [[82, 117], [70, 131]], [[100, 131], [92, 144]]]) tseg(a[0], a[1], b[0], b[1], 0.8, 1.2, 4.0);
+  tpoly(B.columns, { h: 1.2, H: 5, roof: true, hole: [[197, 45.5], [205.5, 46], [204, 55.5], [196.5, 54.5]] });
+  for (const [x, z] of [[198, 46.5], [201.5, 46.5], [204.5, 47.2], [204, 51], [203.2, 54.3], [200, 54], [197, 53.5], [197.2, 50]]) {
+    const y = gy(x, z);
+    colBase(x, z, y, 0.42);
+    col(x, z, { y0: y + 0.2, H: 4.8, s: 0.95 });
+  }
+  // Μικροί τοίχοι ερειπίων από την κάτοψη (εκτός ανακτόρου και Ταφικού Κύκλου, που χτίζονται χωριστά)
+  // Οι αναλημματικοί τοίχοι κρατούν το ίδιο ύψος και στην αναπαράσταση
+  for (const [list, t, h, H] of [[MYK.lines, 0.7, 0.9, 3.6], [MYK.retain, 0.9, 1.1, 1.1]]) {
+    for (const flat of list) {
+      const pts = pairs(flat);
+      for (let i = 0; i < pts.length - 1; i++) {
+        const [x0, z0] = pts[i], [x1, z1] = pts[i + 1], mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
+        if (pointInPoly(mx, mz, palPoly) || Math.hypot(mx + 1.5, mz - 37.5) < 15.5) continue;
+        tseg(x0, z0, x1, z1, t, h, H);
+      }
+    }
+  }
+
+  // Ανάκτορο: Μεγάλη Αυλή και μέγαρο σε τοπικό σύστημα με άξονα u προς το μέγαρο (ανατολικά)
+  setFrame(PAL.ox, PAL.oz, THETA);
+  {
+    const mo = { y0: YC, h: 0.9, H: 7.4, low: 'rubble', up: 'mud' };
+    box('floorMyk', 9, YC + 0.04, 7.375, 21, 0.08, 14.75);            // δάπεδο μεγάρου
+    box('floorMyk', -9, YC + 0.03, 10.25, 15, 0.06, 12.5);            // δάπεδο αυλής
+    seg(-1.5, 0.45, 19.5, 0.45, 0.9, mo);
+    seg(-1.5, 14.3, 19.5, 14.3, 0.9, mo);
+    seg(19.05, 0.9, 19.05, 13.85, 0.9, mo);
+    wallRun(0.9, 13.85, 2.75, false, 0.9, [[7.375, 3.4]], mo);
+    wallRun(0.9, 13.85, 6.65, false, 0.9, [[7.375, 2.0]], mo);
+    for (const v of [4.9, 9.85]) { col(-1.0, v, { y0: YC + 0.2, H: 7.2, s: 1.2 }); colBase(-1.0, v, YC + 0.02, 0.6); }
+    for (const du of [-2.9, 2.9]) for (const dv of [-3.1, 3.1]) { col(12.85 + du, 7.375 + dv, { y0: YC + 0.2, H: 7.2, s: 1.25 }); colBase(12.85 + du, 7.375 + dv, YC + 0.04, 0.62); }
+    block(12.85, 13.2, 1.4, 1.0, { y0: YC + 0.08, h: 0, H: 0.9, up: 'relief' });   // θρόνος (θέση κατά προσέγγιση)
+    // Στέγη με άνοιγμα πάνω από την εστία και υπερυψωμένο φεγγίτη
+    const rf = { y0: YC + 7.4, h: 0, H: 0.4, up: 'roof' };
+    block(9, 2.1375, 21, 4.275, rf);
+    block(9, 12.6125, 21, 4.275, rf);
+    block(4.225, 7.375, 11.45, 6.2, rf);
+    block(17.625, 7.375, 3.75, 6.2, rf);
+    for (const [u, v] of [[10.15, 4.475], [15.55, 4.475], [10.15, 10.275], [15.55, 10.275]]) block(u, v, 0.4, 0.4, { y0: YC + 7.8, h: 0, H: 1.4, up: 'mud' });
+    block(12.85, 7.375, 6.4, 6.8, { y0: YC + 9.2, h: 0, H: 0.3, up: 'roof' });
+    // Αυλή: χαμηλοί τοίχοι, θύρα από τον βόρειο διάδρομο, δυτικό πρόπυλο προς το κλιμακοστάσιο, στηθαίο στα νότια
+    const co = { y0: YC, h: 0.7, H: 4.2, low: 'rubble', up: 'mud' };
+    wallRun(-16.5, -1.5, 4.4, true, 0.8, [[-11, 2.4]], co);
+    wallRun(4.8, 16.5, -16.1, false, 0.8, [[10.5, 2.6]], co);
+    seg(-16.5, 16.9, -1.5, 16.9, 0.6, { y0: YC, h: 0.5, H: 1.1, low: 'rubble', up: 'mud' });
+    seg(-1.9, 14.75, -1.9, 16.6, 0.6, { y0: YC, h: 0.5, H: 1.1, low: 'rubble', up: 'mud' });
+  }
+  const hearth = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.75, 0.22, 40), M.hearth);
+  const hearthRim = new THREE.Mesh(new THREE.TorusGeometry(1.62, 0.1, 6, 40), M.relief);
+  const [hx, hz] = palW(12.85, 7.375);
+  hearth.position.set(hx, YC + 0.19, hz);
+  hearthRim.rotation.x = Math.PI / 2;
+  hearthRim.position.set(hx, YC + 0.3, hz);
+  hearth.receiveShadow = true;
+  s.root.add(hearth, hearthRim);
+
+  // Πρόπυλο: δύο στοές με έναν κίονα η καθεμιά, άξονας προς τα νοτιοανατολικά
+  setFrame(88.5, 27.5, Math.atan2(0.75, 0.66));
+  {
+    const yp = 30;
+    const po = { y0: yp, h: 0.8, H: 5.0, low: 'rubble', up: 'mud' };
+    box('floorMyk', 0, yp + 0.03, 0, 9, 0.06, 7.8);
+    seg(-4.5, -3.5, 4.5, -3.5, 0.8, po);
+    seg(-4.5, 3.5, 4.5, 3.5, 0.8, po);
+    wallRun(-3.1, 3.1, 0, false, 0.8, [[0, 2.4]], po);
+    for (const u of [-3.6, 3.6]) { col(u, 0, { y0: yp + 0.2, H: 4.8, s: 1.05 }); colBase(u, 0, yp + 0.02, 0.5); }
+    block(0, 0, 9.6, 8.2, { y0: yp + 5.0, h: 0, H: 0.35, up: 'roof' });
+  }
+  setFrame(0, 0, null);
+
+  // Μεγάλο Κλιμακοστάσιο: δύο σκέλη με πλατύσκαλο
+  {
+    const [[bx, bz, by], [tx, tz, ty]] = STAIR;
+    const dx = tx - bx, dz = tz - bz, L = Math.hypot(dx, dz), n = 28, ry = Math.atan2(-dz, dx);
+    for (let i = 0; i < n; i++) {
+      const k = (i + 0.5) / n, top = by + (ty - by) * (i + 1) / n;
+      box('steps', bx + dx * k, (by - 0.6 + top) / 2, bz + dz * k, L / n, top - by + 0.6, 3.4, ry);
+    }
+  }
+
+  // Υπόγεια δεξαμενή: η αρχή του διαδρόμου με τα σκαλοπάτια, προς το βορειοανατολικό τείχος
+  {
+    const x0 = 256.5, z0 = -1.8, dx = 0.6, dz = -0.8, y0 = gy(x0, z0);
+    const ry = Math.atan2(-dz, dx);
+    const hole = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.06, 1.5), mat(0x2E2924));
+    hole.position.set(x0 + dx * 3.2, y0 + 0.12, z0 + dz * 3.2);
+    hole.rotation.y = ry;
+    s.root.add(hole);
+    for (let i = 0; i < 7; i++) box('steps', x0 + dx * (0.45 + i * 0.85), y0 + 0.17, z0 + dz * (0.45 + i * 0.85), 0.16, 0.05, 1.5, ry);
+    for (const side of [-1, 1]) {
+      const ox = -dz * side * 1.15, oz = dx * side * 1.15;
+      aseg(x0 + ox, z0 + oz, x0 + dx * 6.4 + ox, z0 + dz * 6.4 + oz, 0.8, { y0: y0 - 1, h: 1.9, H: 2.4, low: 'rubble', up: 'mud' });
+    }
+  }
+
+  // Πινακίδες: βορράς, κλίμακα, μνημεία έξω από τη μακέτα
+  s.root.add(flatSign(compassCanvas(), 20, SIGNS.compass[0], SIGNS.compass[1], gy(...SIGNS.compass) + 0.3));
+  s.root.add(flatSign(scaleCanvas(50), 60, SIGNS.scale[0], SIGNS.scale[1], gy(...SIGNS.scale) + 0.3));
+  s.root.add(flatSign(arrowSignCanvas('Θησαυρός του Ατρέα', '500 μ. νοτιοδυτικά', [-0.55, 0.835]), 44, SIGNS.treasury[0], SIGNS.treasury[1], gy(...SIGNS.treasury) + 0.3));
+  s.root.add(flatSign(arrowSignCanvas('Ταφικός Κύκλος Β', '150 μ. δυτικά', [-1, -0.06]), 40, SIGNS.gcb[0], SIGNS.gcb[1], gy(...SIGNS.gcb) + 0.3));
+}
+
+SITES.mykines = {
+  id: 'mykines', short: 'Μυκήνες', title: 'Μυκήνες XR',
+  lead: 'Η ακρόπολη των Μυκηνών με τα κυκλώπεια τείχη, την Πύλη των Λεόντων, τον Ταφικό Κύκλο Α και το ανάκτορο, ως μακέτα πάνω στο θρανίο ή σε φυσικό μέγεθος.',
+  aria: 'Τρισδιάστατο μοντέλο της ακρόπολης των Μυκηνών',
+  poisHeading: 'Σημεία της ακρόπολης',
+  pois: MYK_POIS,
+  groups: ['Είσοδος και τείχη', 'Ανάκτορο', 'Ταφικοί χώροι', 'Οικισμός'],
+  teleport: ['lion', 'gca', 'ramp', 'propylon', 'court', 'megaron', 'cult', 'columns', 'northgate', 'cistern'],
+  first: 'lion',
+  pivot: [110, -40, 50], table: 1 / 700, tableMin: 1 / 1500, tableMax: 1 / 100,
+  cam: { pos: [-52, 138, 332], target: [88, 10, 58], min: 25, max: 1100, back: 80, up: 60 },
+  shadow: { x: 110, z: 50, half: 250 },
+  lift: { today: 13, recon: 17 }, labelClamp: [0.6, 14], near: 230,
+  liftMap: { lion: 1.0, bastion: 0.7, granary: 0.5, gca: 0.75, ramp: 1.15, warrior: 0.6, court: 0.75, megaron: 1.15, propylon: 0.8, stair: 0.55, columns: 0.95, artisans: 0.6, northgate: 1.6, cistern: 0.6, walls: 0.8, cult: 0.9, northq: 0.7, treasury: 0.6, gcb: 0.6 },
+  major: new Set(['lion', 'walls', 'gca', 'ramp', 'megaron', 'cult', 'columns', 'northgate', 'cistern', 'treasury', 'gcb']),
+  toggle: null, legend: ['stone', 'plaster'],
+  wallLow: 'rubble', wallUp: 'mud',
+  colMats: ['shaftMyk', 'capMyk', 'shaftMyk', 'capMyk'],
+  foot: '<p>Σχηματικό μοντέλο. Η κάτοψη των τειχών και των κτιρίων προέρχεται από το OpenStreetMap και το ανάγλυφο από το ψηφιακό μοντέλο εδάφους EU-DEM. Τα ύψη των ερειπίων, οι στέγες και η εσωτερική διάταξη του ανακτόρου είναι κατά προσέγγιση. Σταθερά σημεία αναφοράς: τείχη μήκους περίπου 900 μ., Ταφικός Κύκλος Α διαμέτρου 27,5 μ.</p>'
+    + '<p>Πηγές: Υπουργείο Πολιτισμού, <a href="https://etickets.tap.gr/webengines/images/places/000000026/mykines_en.pdf" target="_blank" rel="noopener">ενημερωτικό φυλλάδιο «Mycenae» (ΤΑΠ)</a>. Κάτοψη © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">συντελεστές του OpenStreetMap</a> (ODbL). Ανάγλυφο: Copernicus EU-DEM, μέσω <a href="https://www.opentopodata.org/" target="_blank" rel="noopener">Open Topo Data</a>.</p>',
+  build: buildMykines,
+};
+
+/* ==================================================================
+   ΜΥΚΗΝΕΣ, ΘΗΣΑΥΡΟΣ ΤΟΥ ΑΤΡΕΑ
+   Τοπικό σύστημα: αρχή στο κέντρο του δαπέδου του θαλάμου, x κατά τον άξονα
+   του δρόμου προς τα έξω (ανατολικά), z κάθετα (θετικό προς νότο), y = 0 στο δάπεδο.
+   Ο πλευρικός θάλαμος βρίσκεται στη βόρεια πλευρά (z < 0).
+   ================================================================== */
+const ATR_POIS = [
+  { id: 'dromos', group: 'Δρόμος και είσοδος', name: 'Δρόμος', p: [30, 1.5, 0], stand: [46, 0, 0], yaw: 270,
+    text: 'Ο ανοιχτός διάδρομος προς τον τάφο, μήκους 36 μ. και πλάτους 6 μ., σκαμμένος στην πλαγιά. Οι τοίχοι του, από μεγάλους λαξευμένους λίθους, ψηλώνουν από μισό μέτρο στην αρχή ως 10 μ. μπροστά στην πρόσοψη.' },
+  { id: 'facade', group: 'Δρόμος και είσοδος', name: 'Πρόσοψη', p: [12.9, 10.6, -3.2], stand: [21, 0, 0], yaw: 270,
+    text: 'Ύψος 10,5 μ. Στην αρχαιότητα τη στόλιζαν ημικίονες από πράσινο λίθο με ζιγκ ζαγκ, ταινίες από κόκκινο λίθο με ρόδακες και σπείρες, και πλάκες που έκλειναν το ανακουφιστικό τρίγωνο. Κομμάτια τους φυλάσσονται σήμερα στο Βρετανικό Μουσείο και στο Εθνικό Αρχαιολογικό Μουσείο.' },
+  { id: 'door', group: 'Δρόμος και είσοδος', name: 'Είσοδος', p: [12.9, 2.8, 0], stand: [14.8, 0, 0], yaw: 270,
+    text: 'Η θύρα έχει ύψος 5,4 μ. και πλάτος 2,7 μ. Οι παραστάδες γέρνουν ελαφρά προς τα μέσα, οπότε το άνοιγμα στενεύει προς τα πάνω. Ο διάδρομος της εισόδου έχει βάθος 5,4 μ.' },
+  { id: 'lintel', group: 'Δρόμος και είσοδος', name: 'Υπέρθυρο', p: [9.0, 6.0, 0], stand: null, yaw: 0,
+    text: 'Το εσωτερικό υπέρθυρο είναι ένας μόνο λίθος μήκους 8 μ., πλάτους 5 μ. και πάχους 1,2 μ., βάρους περίπου 120 τόνων.' },
+  { id: 'triangle', group: 'Δρόμος και είσοδος', name: 'Ανακουφιστικό τρίγωνο', p: [12.9, 8.6, 0], stand: null, yaw: 0,
+    text: 'Το κενό πάνω από το υπέρθυρο μεταφέρει το βάρος της τοιχοποιίας στα πλάγια, ώστε να μη σπάσει ο λίθος. Είναι η ίδια λύση με την Πύλη των Λεόντων.' },
+  { id: 'tholos', group: 'Θάλαμος', name: 'Θολωτός θάλαμος', p: [0, 13.2, 0], stand: [4.8, 0, 0], yaw: 270,
+    text: 'Διάμετρος 14,5 μ. και ύψος 13,2 μ. Ο θόλος είναι εκφορικός: 33 δόμοι από λαξευμένους λίθους, κάθε δόμος προεξέχει λίγο από τον από κάτω του ως την κορυφή. Ήταν ο ψηλότερος και φαρδύτερος λίθινος θόλος στον κόσμο για πάνω από χίλια χρόνια, ως τα ρωμαϊκά χρόνια.' },
+  { id: 'side', group: 'Θάλαμος', name: 'Πλευρικός θάλαμος', p: [0, 2.6, -12.65], stand: [0, 0, -4.2], yaw: 0,
+    text: 'Τετράγωνος θάλαμος περίπου 6 επί 6 μ., λαξευμένος στον βράχο, στη βόρεια πλευρά του θόλου. Η θύρα του έχει ύψος 2,5 μ. Οι περισσότεροι ερευνητές πιστεύουν ότι εδώ γίνονταν οι ταφές, αν και δεν σώθηκαν ευρήματα που να το αποδεικνύουν.' },
+  { id: 'mound', group: 'Θάλαμος', name: 'Τύμβος', p: [-10, 15.5, 8], stand: null, yaw: 0,
+    text: 'Ο θάλαμος σκάφτηκε στην πλαγιά και το πάνω μέρος του θόλου σκεπάστηκε με χωμάτινο τύμβο, που τον συγκρατούσε τοίχος από πωρόλιθο.' },
+];
+
+function buildAtreas(s) {
+  const R = 7.25, H = 13.2, XF = 12.65, XE = 48.65, DH = 5.4, LT = 6.6;
+  const r = (y) => (y >= H ? 0 : R * Math.pow(1 - (y / H) ** 2, 0.55));
+  const slope = (x) => (x >= XE ? Math.max(-1.2, 0.5 - (x - XE) * 0.12) : x >= XF ? 0.5 + (XE - x) * (9.5 / 36) : 10 + (XF - x) * 0.1);
+  const mound = (x, z) => { const d = Math.hypot(x, z); return d < 23 ? 16.2 * Math.pow(1 - (d / 23) ** 2, 0.75) : 0; };
+  const hill = (x, z) => Math.max(slope(x), mound(x, z));
+  const inTrench = (x, z) => x > XF + 0.01 && x < XE + 0.6 && Math.abs(z) < 4.1;
+  const BASE = -4;
+
+  s.south = new THREE.Group(); s.caps = new THREE.Group(); s.reconS = new THREE.Group();
+  s.root.add(s.south, s.caps);
+  s.recon.add(s.reconS);
+  const N = s.root, S = s.south;
+  const add = (group, geom, material, shadow = true) => {
+    const m = new THREE.Mesh(geom, material);
+    m.castShadow = shadow; m.receiveShadow = true;
+    group.add(m);
+    return m;
+  };
+  // Κουτί που χωρίζεται στο z = 0: το βόρειο μισό μένει πάντα, το νότιο κρύβεται στην τομή
+  const splitBox = (x0, x1, y0, y1, z0, z1, material, S_ = 4, gN = N, gS = S) => {
+    for (const [a, b, g] of [[z0, Math.min(z1, 0), gN], [Math.max(z0, 0), z1, gS]]) {
+      if (b - a < 1e-3) continue;
+      add(g, texBox(x1 - x0, y1 - y0, b - a, S_).translate((x0 + x1) / 2, (y0 + y1) / 2, (a + b) / 2), material);
+    }
+  };
+
+  // Έδαφος σε δύο μισά, με το σκάμμα του δρόμου ανοιχτό
+  const hash = (x, z) => { const v = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return v - Math.floor(v); };
+  const tColor = (x, z, y, ny) => {
+    const m = mound(x, z) > slope(x) + 0.3 ? 1 : 0;
+    const c = m ? [0.55, 0.58, 0.39] : [0.6, 0.59, 0.43];
+    const rock = smoothstep(Math.min(Math.max((0.9 - ny) / 0.3, 0), 1));
+    const k = 0.94 + 0.1 * hash(Math.round(x), Math.round(z));
+    return c.map((v, i) => (v + ([0.58, 0.54, 0.47][i] - v) * rock) * k);
+  };
+  const terr = (z0, z1, sides) => {
+    const g = terrainMesh({ x0: XF - 45, x1: XF + 45, z0, z1, step: 0.75, base: BASE, height: hill, color: tColor, sides });
+    // Αφαίρεση των τριγώνων μέσα στο σκάμμα του δρόμου
+    const top = g.children[0].geometry, pos = top.attributes.position, idx = top.index.array, keep = [];
+    for (let i = 0; i < idx.length; i += 3) {
+      const cx = (pos.getX(idx[i]) + pos.getX(idx[i + 1]) + pos.getX(idx[i + 2])) / 3;
+      const cz = (pos.getZ(idx[i]) + pos.getZ(idx[i + 1]) + pos.getZ(idx[i + 2])) / 3;
+      if (!inTrench(cx, cz)) keep.push(idx[i], idx[i + 1], idx[i + 2]);
+    }
+    top.setIndex(keep);
+    return g;
+  };
+  N.add(terr(-30, 0, 'nwe'));
+  S.add(terr(0, 30, 'swe'));
+
+  // Δάπεδα: θάλαμος, διάδρομος εισόδου, δρόμος
+  const floorMat = mat(0xC4B48F);
+  add(N, new THREE.CircleGeometry(R + 0.05, 64, 0, Math.PI).rotateX(-Math.PI / 2).translate(0, 0.01, 0), floorMat, false);
+  add(S, new THREE.CircleGeometry(R + 0.05, 64, Math.PI, Math.PI).rotateX(-Math.PI / 2).translate(0, 0.01, 0), floorMat, false);
+  splitBox(6.4, XF, -0.3, 0.012, -1.4, 1.4, floorMat);
+  splitBox(XF, XE + 0.6, -0.3, 0.01, -3.05, 3.05, floorMat);
+
+  // Θόλος: 33 δόμοι, ανοίγματα για την είσοδο (ανατολικά) και τον πλευρικό θάλαμο (βόρεια)
+  const domeMat = new THREE.MeshLambertMaterial({ map: canvasTexture(coursesCanvas(33)), side: THREE.DoubleSide });
+  domeMat.map.wrapS = THREE.RepeatWrapping;
+  const lathe = (y0, y1, a0, a1, group) => {
+    const n = Math.max(2, Math.round((y1 - y0) / 0.2)), pts = [];
+    for (let k = 0; k <= n; k++) { const y = y0 + (y1 - y0) * k / n; pts.push(new THREE.Vector2(Math.max(r(y), 0.002), y)); }
+    const len = a1 - a0, geo = new THREE.LatheGeometry(pts, Math.max(4, Math.round(len / (Math.PI * 2) * 96)), a0, len);
+    const uv = geo.attributes.uv, pos = geo.attributes.position;
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, (a0 + uv.getX(i) * len) / (Math.PI * 2), pos.getY(i) / H);
+    add(group, geo, domeMat, false);
+  };
+  const P2 = Math.PI / 2, g1 = 0.19, g2 = 0.105;
+  lathe(0, 2.5, P2 + g1, Math.PI - g2, N); lathe(0, 2.5, Math.PI + g2, 3 * P2, N); lathe(0, 2.5, 3 * P2, 5 * P2 - g1, S);
+  lathe(2.5, DH, P2 + g1, 3 * P2, N); lathe(2.5, DH, 3 * P2, 5 * P2 - g1, S);
+  lathe(DH, H, P2, 3 * P2, N); lathe(DH, H, 3 * P2, 5 * P2, S);
+
+  // Διάδρομος της εισόδου: πλευρικοί τοίχοι που αρχίζουν από την καμπύλη του θόλου, υπέρθυρο
+  const ashlarA = texMat('ashlarA', () => ashlarCanvas({ rows: 10, minLen: 0.13, maxLen: 0.3, base: [196, 184, 158], seedValue: 7 }));
+  for (const side of [-1, 1]) {
+    const hw = 1.3, prof = [];
+    for (let k = 0; k <= 12; k++) { const y = DH * k / 12; prof.push([Math.sqrt(Math.max(r(y) ** 2 - hw * hw, 0)), y]); }
+    const sh = shapeOf([...prof, [XF, DH], [XF, 0]].map(([x, y]) => [x, y]));
+    const geo = extrude(sh, 0.8, 4).translate(0, 0, side > 0 ? hw : -hw - 0.8);
+    add(side > 0 ? S : N, geo, ashlarA);
+  }
+  const lintelMat = mat(0xB2A386);
+  splitBox(6.5, XF - 1.2, DH, LT, -4, 4, lintelMat, 4);
+
+  // Πρόσοψη: δύο μισά με το άνοιγμα της θύρας και το ανακουφιστικό τρίγωνο
+  const facadeHalf = (sgn) => {
+    const pts = [[-5.2, 0], [-1.35, 0], [-1.225, DH], [0, DH], [0, LT], [-1.7, LT], [0, 10.2], [0, 10.5], [-5.2, 10.5]].map(([z, y]) => [z * sgn, y]);
+    if (sgn > 0) pts.reverse();
+    return extrude(shapeOf(pts), 1.2, 4).rotateY(-Math.PI / 2).translate(XF, 0, 0);
+  };
+  add(N, facadeHalf(1), ashlarA);
+  add(S, facadeHalf(-1), ashlarA);
+  const cavity = mat(0x3A3229);
+  for (const [g, sgn] of [[N, -1], [S, 1]]) {
+    const geo = new THREE.ShapeGeometry(shapeOf(sgn < 0 ? [[-1.7, LT], [0, LT], [0, 10.2]] : [[0, LT], [1.7, LT], [0, 10.2]]));
+    geo.rotateY(-Math.PI / 2).translate(XF - 1.18, 0, 0);
+    add(g, geo, cavity, false);
+  }
+  splitBox(XF - 1.2, XF, 10.5, 13.4, -5.2, 5.2, mat(0x8F8160), 4);
+
+  // Τοίχοι του δρόμου: η στέψη ακολουθεί την πλαγιά
+  for (const [z0, z1, g] of [[-5.2, -3, N], [3, 5.2, S]]) {
+    const ring = densify([[XF, z0], [XE, z0], [XE, z1], [XF, z1]], 1.5);
+    const zEdge = z0 < 0 ? z0 : z1;
+    add(g, bandGeometry(ring, () => -0.5, (x) => Math.max(slope(x), mound(x, zEdge)) + 0.05, 4), ashlarA);
+  }
+
+  // Πλευρικός θάλαμος στα βόρεια: διάδρομος 1,5 μ. και δωμάτιο 6 × 6 μ. λαξευμένο στον βράχο
+  const rock = mat(HEX.rock, { side: THREE.DoubleSide });
+  for (const x of [-0.75, 0.75]) add(N, new THREE.BoxGeometry(0.3, 2.5, 2.5).translate(x + Math.sign(x) * 0.15, 1.25, -8.4), rock);
+  add(N, new THREE.BoxGeometry(2.2, 0.6, 2.75).translate(0, 2.8, -8.28), lintelMat);
+  const room = new THREE.Group();
+  const plane = (w, h, x, y, z, ry, rx = 0) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), rock); m.position.set(x, y, z); m.rotation.set(rx, ry, 0); room.add(m); };
+  plane(6, 5.8, 0, 2.9, -15.65, 0);
+  plane(6, 5.8, -3, 2.9, -12.65, Math.PI / 2);
+  plane(6, 5.8, 3, 2.9, -12.65, -Math.PI / 2);
+  plane(6, 6, 0, 5.8, -12.65, 0, Math.PI / 2);
+  plane(6, 6, 0, 0.01, -12.65, 0, -Math.PI / 2);
+  plane(2.25, 5.8, -1.875, 2.9, -9.65, Math.PI);
+  plane(2.25, 5.8, 1.875, 2.9, -9.65, Math.PI);
+  plane(1.5, 3.3, 0, 4.15, -9.65, Math.PI);
+  N.add(room);
+
+  // Τομή στο z = 0: έδαφος και τοιχοποιία σε προφίλ
+  const prof = [];
+  for (let x = XF - 45; x < XF; x += 1) prof.push([x, hill(x, 0)]);
+  const domeR = [], domeL = [];
+  for (let y = DH; y <= H; y += 0.3) domeR.push([r(y), y]);
+  domeR.push([0, H]);
+  for (let y = H - 0.3; y >= 0; y -= 0.3) domeL.push([-r(y), y]);
+  domeL.push([-R, 0]);
+  const tail = [];
+  for (let x = XE; x <= XF + 45; x += 1) tail.push([x, hill(x, 0)]);
+  const earthPts = [[XF - 45, BASE], ...prof, [XF, hill(XF, 0)], [XF, 10.2], [XF - 1.2, 10.2], [XF - 1.2, LT], [XF, LT], [XF, DH], [r(DH), DH], ...domeR, ...domeL, [XE, 0], ...tail, [XF + 45, BASE]];
+  const capMat = mat(HEX.earth, { side: THREE.DoubleSide });
+  const stoneCap = mat(HEX.cut, { side: THREE.DoubleSide });
+  const cap = new THREE.Mesh(new THREE.ShapeGeometry(shapeOf(earthPts)).translate(0, 0, 0.01), capMat);
+  const arch = [];
+  for (let y = 0; y <= H; y += 0.3) arch.push([-(r(y) + 1.4), y]);
+  arch.push([0, H + 1.3]);
+  for (let y = H; y >= DH; y -= 0.3) arch.push([r(y) + 1.4, y]);
+  arch.push([r(DH), DH]);
+  for (let y = DH + 0.3; y < H; y += 0.3) arch.push([r(y), y]);
+  arch.push([0, H]);
+  for (let y = H - 0.3; y >= 0; y -= 0.3) arch.push([-r(y), y]);
+  arch.push([-R, 0]);
+  const archMesh = new THREE.Mesh(new THREE.ShapeGeometry(shapeOf(arch)).translate(0, 0, 0.02), stoneCap);
+  const lintelCap = new THREE.Mesh(new THREE.ShapeGeometry(shapeOf([[6.5, DH], [XF - 1.2, DH], [XF - 1.2, LT], [6.5, LT]])).translate(0, 0, 0.03), stoneCap);
+  const facadeCap = new THREE.Mesh(new THREE.ShapeGeometry(shapeOf([[XF - 1.2, DH], [XF, DH], [XF, LT], [XF - 1.2, LT]])).translate(0, 0, 0.03), stoneCap);
+  s.caps.add(cap, archMesh, lintelCap, facadeCap);
+
+  // Αναπαράσταση της διακόσμησης της πρόσοψης
+  const zig = new THREE.MeshLambertMaterial({ map: repeatTexture(zigzagCanvas()) });
+  zig.map.repeat.set(1, 3);
+  const ros = new THREE.MeshLambertMaterial({ map: canvasTexture(rosetteCanvas()) });
+  const spi = new THREE.MeshLambertMaterial({ map: canvasTexture(spiralCanvas()), side: THREE.DoubleSide });
+  const green = M.green;
+  for (const [sgn, g] of [[-1, s.recon], [1, s.reconS]]) {
+    const z = 1.95 * sgn;
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.28, 5.0, 16, 1, false, 0, Math.PI).translate(0, 2.75, 0), zig);
+    shaft.position.set(XF, 0, z);
+    const plinth = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.25, 0.9).translate(XF + 0.2, 0.125, z), green);
+    const capital = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.95).translate(XF + 0.25, 5.43, z), green);
+    const small = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 3.4, 12, 1, false, 0, Math.PI).translate(0, LT + 1.75, 0), zig);
+    small.position.set(XF, 0, 2.15 * sgn);
+    const band = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.9, 2.6).translate(XF + 0.03, 6.0, 1.3 * sgn), ros);
+    const tri = new THREE.Mesh(new THREE.ShapeGeometry(shapeOf(sgn < 0 ? [[-1.7, LT], [0, LT], [0, 10.2]] : [[0, LT], [1.7, LT], [0, 10.2]])).rotateY(-Math.PI / 2).translate(XF + 0.02, 0, 0), spi);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.3, 5.2).translate(XF + 0.03, 10.35, 2.6 * sgn), ros);
+    for (const m of [shaft, plinth, capital, small, band, tri, top]) { m.castShadow = true; g.add(m); }
+  }
+
+  s.onSection = (on) => { s.south.visible = !on; s.reconS.visible = !on; s.caps.visible = on; };
+  s.root.add(flatSign(compassCanvas(), 6, XF + 38, -24, Math.max(hill(XF + 38, -24), 0) + 0.15, Math.atan2(0.968, -0.25) - Math.PI / 2));
+  s.root.add(flatSign(scaleCanvas(10), 12, XF + 36, -13, hill(XF + 36, -13) + 0.15));
+}
+
+SITES.atreas = {
+  id: 'atreas', short: 'Θησαυρός του Ατρέα', title: 'Μυκήνες XR',
+  lead: 'Ο Θησαυρός του Ατρέα, ο μεγαλύτερος θολωτός τάφος των Μυκηνών, με τομή κατά μήκος για να φαίνεται το εσωτερικό. Στην περιήγηση 1:1 μπαίνετε στον θάλαμο.',
+  aria: 'Τρισδιάστατο μοντέλο του Θησαυρού του Ατρέα',
+  poisHeading: 'Σημεία του τάφου',
+  pois: ATR_POIS,
+  groups: ['Δρόμος και είσοδος', 'Θάλαμος'],
+  teleport: ['dromos', 'facade', 'door', 'tholos', 'side'],
+  first: 'tholos',
+  pivot: [12.65, -4, 0], table: 1 / 120, tableMin: 1 / 300, tableMax: 1 / 25,
+  cam: { pos: [30, 30, 74], target: [14, 4, 0], min: 4, max: 260, back: 24, up: 14 },
+  shadow: { x: 12, z: 0, half: 60 },
+  lift: { today: 3.5, recon: 3.5 }, labelClamp: [0.25, 5], near: 60,
+  liftMap: { door: 0.45, lintel: 0.9, triangle: 1.2, facade: 1.6, tholos: 1.0, mound: 0.8, side: 0.8, dromos: 1.0 },
+  major: new Set(['dromos', 'facade', 'tholos', 'side', 'mound', 'triangle']),
+  toggle: 'section', legend: ['stone', 'deco'],
+  foot: '<p>Σχηματικό μοντέλο με τις διαστάσεις του μνημείου: δρόμος 36 × 6 μ., πρόσοψη ύψους 10,5 μ., θύρα 5,4 × 2,7 μ., θάλαμος διαμέτρου 14,5 μ. και ύψους 13,2 μ. με 33 δόμους, πλευρικός θάλαμος περίπου 6 × 6 μ. Η μορφή του θόλου, το έδαφος και η διακόσμηση της πρόσοψης είναι κατά προσέγγιση.</p>'
+    + '<p>Πηγές: Υπουργείο Πολιτισμού, <a href="https://etickets.tap.gr/webengines/images/places/000000026/mykines_en.pdf" target="_blank" rel="noopener">ενημερωτικό φυλλάδιο «Mycenae» (ΤΑΠ)</a>. <a href="https://en.wikipedia.org/wiki/Treasury_of_Atreus" target="_blank" rel="noopener">Treasury of Atreus (Wikipedia)</a>.</p>',
+  build: buildAtreas,
+};
 
 /* ------------------------------------------------------------------
-   Πάνελ της σελίδας
+   Εκκίνηση
    ------------------------------------------------------------------ */
-function note(text, warn = false) {
-  const el = document.getElementById('xrNote');
-  el.textContent = text;
-  el.classList.toggle('warn', warn);
-}
-function buildPanel() {
-  const host = document.getElementById('poiList');
-  for (const grp of GROUP_ORDER) {
-    const box = document.createElement('div');
-    box.className = 'poi-group';
-    const h = document.createElement('h3');
-    h.textContent = grp;
-    box.append(h);
-    for (const poi of POIS.filter((p) => p.group === grp)) {
-      const b = document.createElement('button');
-      b.className = 'poi';
-      b.type = 'button';
-      b.id = `poi-${poi.id}`;
-      b.dataset.poi = poi.id;
-      b.textContent = poi.name;
-      b.addEventListener('click', () => selectPoi(poi.id, true));
-      box.append(b);
-    }
-    host.append(box);
-  }
-  document.getElementById('vToday').addEventListener('click', () => setView('today'));
-  document.getElementById('vRecon').addEventListener('click', () => setView('recon'));
-  document.getElementById('chkEvans').addEventListener('change', (e) => setEvans(e.target.checked));
-  document.getElementById('chkLabels').addEventListener('change', (e) => setLabels(e.target.checked));
-  document.getElementById('btnVR').addEventListener('click', () => enterXR('vr'));
-  document.getElementById('btnAR').addEventListener('click', () => enterXR('ar'));
-}
-
-// Επιλογή ετικέτας με κλικ στην επιφάνεια εργασίας
-const down = new THREE.Vector2();
-renderer.domElement.addEventListener('pointerdown', (e) => down.set(e.clientX, e.clientY));
-renderer.domElement.addEventListener('pointerup', (e) => {
-  if (renderer.xr.isPresenting || !state.labels) return;
-  if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5) return;
-  const r = renderer.domElement.getBoundingClientRect();
-  const ndc = new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-  raycaster.setFromCamera(ndc, camera);
-  const hit = raycaster.intersectObjects(visibleLabels(), false)[0];
-  if (hit) selectPoi(hit.object.userData.poi, true);
-});
-
-async function checkXR() {
-  const vr = document.getElementById('btnVR'), ar = document.getElementById('btnAR');
-  if (!('xr' in navigator)) { note('Αυτός ο browser δεν υποστηρίζει WebXR. Ανοίξτε τη σελίδα από τον browser του Meta Quest 3 ή του Magic Leap 2.'); return; }
-  const [okVR, okAR] = await Promise.all([
-    navigator.xr.isSessionSupported('immersive-vr').catch(() => false),
-    navigator.xr.isSessionSupported('immersive-ar').catch(() => false),
-  ]);
-  vr.disabled = !okVR; ar.disabled = !okAR;
-  if (okVR || okAR) note('Η συσκευή υποστηρίζει ' + [okVR && 'VR', okAR && 'AR'].filter(Boolean).join(' και ') + '. Στο μενού μέσα στα γυαλιά επιλέγετε μακέτα ή περιήγηση 1:1.');
-  else note('Δεν βρέθηκαν γυαλιά XR. Ανοίξτε τη σελίδα από τον browser του Meta Quest 3 ή του Magic Leap 2.');
-}
-
-buildData();
-buildMeshes();
-buildLabels();
-buildPanel();
+bindPanel();
 applyEvansColors();
 scene.background = sceneColor();
-setView('today');
-selectPoi('court');
+let startSite = 'knossos';
+try {
+  const q = new URLSearchParams(location.search).get('site');
+  if (q && SITES[q]) startSite = q;
+} catch (e) { /* χωρίς παραμέτρους */ }
 resize();
+setSite(startSite, true);
 checkXR();
-document.fonts?.ready.then(() => { for (const id of labels.keys()) refreshLabelTexture(id); drawMenu(); });
+document.fonts?.ready.then(() => {
+  for (const s of builtSites()) for (const id of s.labels.keys()) refreshLabelTexture(s, id);
+  drawMenu();
+});
 </script>
 
 </body>
